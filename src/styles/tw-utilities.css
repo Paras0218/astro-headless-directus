@@ -1,0 +1,4 @@
+/* Tailwind WITHOUT preflight/base — used by the standalone homepage so our
+   header utilities work without resetting the downloaded page's own design. */
+@tailwind components;
+@tailwind utilities;

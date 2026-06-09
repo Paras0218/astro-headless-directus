@@ -1,0 +1,35 @@
+/* Self-hosted Proxima Nova — the Thrive brand font, used across the whole project.
+   Weight-mapped so: body/normal = Regular, bold/links = Bold, headings/CTA = ExtraBold. */
+@font-face {
+  font-family: 'proximanova';
+  src: url('/fonts/proximanova/ProximaNova-Regular.woff2') format('woff2'),
+       url('/fonts/proximanova/ProximaNova-Regular.woff') format('woff');
+  font-weight: 300 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'proximanova';
+  src: url('/fonts/proximanova/ProximaNova-Bold.woff2') format('woff2'),
+       url('/fonts/proximanova/ProximaNova-Bold.woff') format('woff');
+  font-weight: 600 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'proximanova';
+  src: url('/fonts/proximanova/ProximaNova-Extrabld.woff2') format('woff2'),
+       url('/fonts/proximanova/ProximaNova-Extrabld.woff') format('woff');
+  font-weight: 800 900;
+  font-style: normal;
+  font-display: swap;
+}
+/* Explicit ExtraBold family alias (matches the WordPress `ProximaNova-Extrabld` name). */
+@font-face {
+  font-family: 'proximanova-extrabld';
+  src: url('/fonts/proximanova/ProximaNova-Extrabld.woff2') format('woff2'),
+       url('/fonts/proximanova/ProximaNova-Extrabld.woff') format('woff');
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}

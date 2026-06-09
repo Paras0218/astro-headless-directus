@@ -1,0 +1,207 @@
+---
+// Site footer — reusable across all pages. Fetches its own CMS content (homepage
+// singleton footer_* fields) so any page can drop in <SiteFooter /> with no props.
+// Self-contained styles (vars + .wrap + .btn baked in) so it also works on Layout
+// pages that don't load the homepage's public/styles.css.
+import { getHomepage } from '../lib/directus';
+const home = await getHomepage();
+---
+<footer class="site-footer">
+  <div class="footer-bg" aria-hidden="true">
+    <img src="/assets/New%20Assets/Object%20%5BVectorized%5D.svg" alt="" />
+  </div>
+
+  <div class="wrap footer-main">
+    <div class="footer-grid">
+
+      <!-- Brand column -->
+      <div class="footer-brand">
+        <a href="/" class="footer-logo" aria-label="Thrive">
+          <svg viewBox="0 212.5 612 356" width="120" height="70" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path fill="#ffffff" d="M30.728 461.596H12.906V431.7H31v-38.8h32.76v38.8h18.084v29.885H63.75v82.308H30.728v-82.308zm71.038 82.307h32.76v-51.375c0-5.242 0-8.918.262-10.753a26.32 26.32 0 0 1 .787-7.083 18.63 18.63 0 0 1 1.048-4.455 17.47 17.47 0 0 1 1.572-3.146c.982-1.437 2.125-2.755 3.407-3.932a36.81 36.81 0 0 1 4.717-3.145 29.07 29.07 0 0 1 5.773-1.835 28.53 28.53 0 0 1 6.814-.786 30.91 30.91 0 0 1 9.173 1.311c1.85.692 3.48 1.87 4.717 3.407 1.048 1.572 2.125 4.193 2.883 8.125.893 5.284 1.332 10.635 1.3 15.994v57.665h32.768v-66.838c0-3.407 0-7.6-.262-12.318-.136-2.82-.487-5.627-1.048-8.394a40.52 40.52 0 0 0-1.834-6.028c-.688-1.884-1.66-3.652-2.883-5.24a29.18 29.18 0 0 0-6.297-7.34 41.95 41.95 0 0 0-8.387-5.241 62.14 62.14 0 0 0-9.959-3.152 53.91 53.91 0 0 0-11.532-1.048c-4.57.083-9.126.52-13.628 1.3a56.21 56.21 0 0 0-11.8 3.938 48.18 48.18 0 0 0-9.96 6.814v-73.915h-31.45V543.9h1.047zM262.97 431.448H230.2v112.455h32.767V494.1c0-4.455.262-9.704.787-15.47a38.25 38.25 0 0 1 3.669-13.891c2.36-4.718 6.814-6.814 12.842-6.814 3.93 0 6.814.524 8.9 1.835 2.125 1.048 4.456 2.883 7.338 4.958l12.58-28.566c-7.083-3.9-14.436-6.015-21.76-6.015h-2.883c-8.648.787-15.725 3.938-21.5 9.967v-8.656zm163.56 124.25l4.193-8.387 53.996-108.778 3.407-6.56H451.95l-1.3 2.9-22.277 51.376-1.572 4.25-.262-.786-1.3-3.407-22.284-51.638-1.3-2.946h-36.168l3.146 6.56L422.6 547.06l3.933 8.648zm93.387-84.927c1.4-3.4 3.56-6.442 6.3-8.9 3.67-3.146 8.9-4.455 15.725-4.455 4.698-.036 9.348.947 13.628 2.883 3.932 2.125 6.814 5.503 8.387 10.483h-44.03zm79.156 25.167v-9.173c.097-7.905-1.04-15.777-3.365-23.333a50.6 50.6 0 0 0-11.794-19.656c-10.242-10.483-24.14-15.76-41.96-15.76-17.035 0-31.167 5.773-42.203 17.043s-16.5 25.685-16.5 42.988c0 18.084 5.24 32.5 15.987 43.506 10.483 11.015 24.904 16.52 42.727 16.52 12.317 0 23.063-2.62 32.505-8.132 4.8-2.792 9.144-6.33 12.843-10.483a69.02 69.02 0 0 0 6.027-7.6 79.03 79.03 0 0 0 4.959-8.387l-26.995-14.415c-5.77 12.84-14.684 19.392-26.74 19.656h-.524c-15.725 0-24.636-7.6-26.732-22.54h81.798l-.022-.233zM369.65 381.4c-17.304-1.3-31.98 18.87-31.98 18.87s-4.718-17.822-35.65-25.954c12.587 4.193 18.877 41.155 18.877 41.155V543.9h32.76V418.345c.5-6.3 2.884-30.664 15.994-36.954z"/>
+            <path fill="#7D963D" d="M379.086 301.965s9.697 22.54 2.358 42.5-28.836 29.615-28.836 29.615-9.697-22.54-2.358-42.458 28.836-29.657 28.836-29.657zm50.064-25.685s3.932 21.25-6.027 37.478c-9.967 15.994-29.885 20.712-29.885 20.712s-3.932-21.25 6.028-37.485c9.96-15.987 29.884-20.705 29.884-20.705zm-66.058-36.174s9.966 19.394 5.24 37.485c-4.717 18.346-22.54 28.588-22.54 28.588s-9.96-19.394-5.24-37.485c4.98-18.104 22.54-28.588 22.54-28.588zm-128.96 57.142s20.967-5.242 37.747 3.67 22.54 28.574 22.54 28.574-20.967 5.242-37.747-3.67c-16.5-8.918-22.54-28.574-22.54-28.574zM393.5 256.094s5.767 13.628 1.835 25.953c-4.193 12.318-16.773 18.346-16.773 18.346s-5.766-13.628-1.834-25.946c4.192-12.063 16.772-18.353 16.772-18.353zm-126.076 8.648s14.415 2.125 22.54 12.042c8.125 9.697 6.814 23.587 6.814 23.587s-14.415-2.125-22.54-12.042-6.814-23.587-6.814-23.587zm41.41-27.782s15.47 10.22 19.664 25.946-4.96 30.67-4.96 30.67-15.5-10.22-19.663-25.954c-3.953-15.462 4.958-30.663 4.958-30.663zm141.284 95.152s-4.193 24.083-23.85 35.905c-19.4 11.8-46.92 7.083-46.92 7.083s4.193-24.083 23.85-35.905c19.678-12.063 46.92-7.083 46.92-7.083zm-31.72 66.576s-14.167 8.9-27.78 5.503-22.015-17.82-22.015-17.82 14.167-8.918 27.78-5.504S418.4 398.69 418.4 398.69zM308.3 289.647s24.38 13.366 31.166 38-6.3 50.844-6.3 50.844S308.786 365.135 302 340.5c-6.814-24.4 6.3-50.85 6.3-50.85zm-82.816 56.355s24.083-12.58 46.92-6.552 35.643 28.333 35.643 28.333-24.083 12.587-46.913 6.552-35.65-28.333-35.65-28.333zm28.808 50.328s10.5-14.676 25.954-17.035c15.463-2.125 29.615 9.173 29.615 9.173s-10.483 14.677-25.946 17.035c-15.457 2.097-29.623-9.173-29.623-9.173z"/>
+          </svg>
+        </a>
+        <h2 class="footer-h2">{home.footer_h2_pre} <em>{home.footer_h2_em}</em><br/>Your Revenue?</h2>
+        <p class="footer-desc" set:html={home.footer_desc_html}></p>
+        <ul class="footer-social" aria-label="Follow Thrive">
+          <li><a href="https://www.facebook.com/ThriveAgency" target="_blank" rel="noopener" aria-label="Facebook">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M13.5 21v-7.5h2.5l.4-3.1h-2.9V8.4c0-.9.25-1.5 1.55-1.5H16.5V4.15A22 22 0 0 0 14.3 4c-2.2 0-3.7 1.34-3.7 3.8v2.6H8v3.1h2.6V21h2.9z"/></svg>
+          </a></li>
+          <li><a href="https://x.com/ThriveAgency" target="_blank" rel="noopener" aria-label="X (Twitter)">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M18.244 3h3.308l-7.227 8.26L23 21h-6.66l-5.214-6.817L5.16 21H1.85l7.73-8.834L1.5 3h6.828l4.713 6.231L18.244 3zm-1.161 16.06h1.833L7.005 4.84H5.04l12.043 14.22z"/></svg>
+          </a></li>
+          <li><a href="https://www.linkedin.com/company/thrive-agency" target="_blank" rel="noopener" aria-label="LinkedIn">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M6.94 6.5a1.94 1.94 0 1 1-3.88 0 1.94 1.94 0 0 1 3.88 0zM7 8.6H3v12.4h4V8.6zm6.32 0H9.34V21h3.94v-6.5c0-3.66 4.77-4 4.77 0V21H22v-7.86c0-6.16-7.06-5.93-8.68-2.9V8.6z"/></svg>
+          </a></li>
+          <li><a href="https://www.youtube.com/@thriveagency" target="_blank" rel="noopener" aria-label="YouTube">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-2C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 2A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 2C5.12 20 12 20 12 20s6.88 0 8.59-.42a2.78 2.78 0 0 0 1.95-2A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58zM9.75 15.02V8.98L15.5 12l-5.75 3.02z"/></svg>
+          </a></li>
+          <li><a href="https://www.instagram.com/thriveinternetmarketingagency/" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><circle cx="12" cy="12" r="3.6"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg>
+          </a></li>
+          <li><a href="https://www.tiktok.com/@thrive.agency" target="_blank" rel="noopener" aria-label="TikTok">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M19.6 6.7a5.4 5.4 0 0 1-3.4-1.2 5.4 5.4 0 0 1-2-3.2h-3.4v13.2a2.6 2.6 0 1 1-2.6-2.6c.3 0 .5 0 .8.1V9.5a6 6 0 0 0-.8-.1A6 6 0 1 0 14.2 15V8.7a8.7 8.7 0 0 0 5.4 1.8V7.1a5.4 5.4 0 0 1 0-.4z"/></svg>
+          </a></li>
+        </ul>
+      </div>
+
+      <!-- Cities column -->
+      <div class="footer-cities">
+        <p class="cities-label">
+          <span>Made with</span>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="#7D963D" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.1A5.4 5.4 0 0 1 12 6a5.4 5.4 0 0 1 9.6 5.9C19.5 16.4 12 21 12 21z"/></svg>
+          <span>in 25 cities around the world</span>
+        </p>
+        <ul class="cities-grid">
+          <li><a href="https://thriveagency.com/arlington-digital-marketing-agency/">Arlington</a></li>
+          <li><a href="https://thriveagency.com/atlanta-digital-marketing-agency/">Atlanta</a></li>
+          <li><a href="https://thriveagency.com/austin-digital-marketing-agency/">Austin</a></li>
+          <li><a href="https://thriveagency.com/baltimore-digital-marketing-agency/">Baltimore</a></li>
+          <li><a href="https://thriveagency.com/chicago-digital-marketing-agency/">Chicago</a></li>
+          <li><a href="https://thriveagency.com/cleveland-digital-marketing-agency/">Cleveland</a></li>
+          <li><a href="https://thriveagency.com/dallas-digital-marketing-agency/">Dallas</a></li>
+          <li><a href="https://thriveagency.com/denver-digital-marketing-agency/">Denver</a></li>
+          <li><a href="https://thriveagency.com/houston-digital-marketing-agency/">Houston</a></li>
+          <li><a href="https://thriveagency.com/jacksonville-digital-marketing/">Jacksonville</a></li>
+          <li><a href="https://thriveagency.com/kansas-city-digital-marketing-agency/">Kansas City</a></li>
+          <li><a href="https://thriveagency.com/las-vegas-digital-marketing-agency/">Las Vegas</a></li>
+          <li><a href="https://thriveagency.com/los-angeles-digital-marketing-agency/">Los Angeles</a></li>
+          <li><a href="https://thriveagency.com/louisville-digital-marketing-agency/">Louisville</a></li>
+          <li><a href="https://thriveagency.com/nyc-digital-marketing-agency/">New York City</a></li>
+          <li><a href="https://thriveagency.com/miami-digital-marketing-agency/">Miami</a></li>
+          <li><a href="https://thriveagency.com/minneapolis-digital-marketing-agency/">Minneapolis</a></li>
+          <li><a href="https://thriveagency.com/phoenix-digital-marketing-agency/">Phoenix</a></li>
+          <li><a href="https://thriveagency.com/new-orleans-digital-marketing-agency/">New Orleans</a></li>
+          <li><a href="https://thriveagency.com/orlando-digital-marketing-agency/">Orlando</a></li>
+          <li><a href="https://thriveagency.com/philadelphia-digital-marketing-agency/">Philadelphia</a></li>
+          <li><a href="https://thriveagency.com/portland-digital-marketing-agency/">Portland</a></li>
+          <li><a href="https://thriveagency.com/san-antonio-digital-marketing-agency/">San Antonio</a></li>
+          <li><a href="https://thriveagency.com/san-diego-digital-marketing-agency/">San Diego</a></li>
+          <li><a href="https://thriveagency.com/seattle-digital-marketing-agency/">Seattle</a></li>
+        </ul>
+      </div>
+
+      <!-- Get started card -->
+      <div class="footer-cta">
+        <div class="cta-card">
+          <div class="cta-tree" aria-hidden="true">
+            <img src="/assets/New%20Assets/Object%20%5BVectorized%5D.svg" alt="" />
+          </div>
+          <div class="cta-content">
+            <h3 class="cta-h3">{home.footer_cta_h3}</h3>
+            <p class="cta-text">{home.footer_cta_text}</p>
+            <a class="btn btn-primary cta-btn" href="#contactForm">GET PROPOSAL</a>
+            <a class="cta-phone" href="tel:8883420534">(888) 342-0534</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="wrap footer-bottom">
+    <p>© 2026 - Thrive Internet Marketing Agency<span class="sep">/</span><a href="https://thriveagency.com/locations/">Locations</a><span class="sep">/</span><a href="https://thriveagency.com/referral/">Refer Thrive</a><span class="sep">/</span><a href="https://thriveagency.com/terms-conditions/">Terms</a><span class="sep">/</span><a href="https://thriveagency.com/privacy-policy/">Privacy Policy</a><span class="sep">/</span><a href="https://thriveagency.com/important-update-regarding-scammers/">Scam Alert</a><span class="sep">/</span><a href="https://thriveagency.com/site-map/">Sitemap</a></p>
+  </div>
+</footer>
+
+<style>
+  /* Self-contained: vars + .wrap + .btn baked in so the footer looks right on
+     any page, including Layout pages that don't load public/styles.css. */
+  .site-footer {
+    --thrive-orange: #D87928;
+    --thrive-orange-dark: #b56120;
+    --ink: #443F34;
+    --ink-soft: #3a3a3a;
+    position: relative;
+    background: #403C33;
+    color: #f6f1e6;
+    padding: 0;
+    overflow: hidden;
+    isolation: isolate;
+    border-top: none;
+    font-size: 16px;
+    font-family: inherit;
+  }
+  .site-footer .wrap { max-width: 1240px; margin: 0 auto; padding: 0 24px; display: block; }
+  .site-footer .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    height: 56px; padding: 0 30px; border-radius: 999px;
+    font-family: inherit; font-weight: 700; font-size: 15px; letter-spacing: 0.01em;
+    border: 0; cursor: pointer; text-decoration: none; white-space: nowrap;
+    transition: transform .15s ease, background .15s ease, color .15s ease;
+  }
+  .site-footer .btn-primary { background: var(--thrive-orange); color: #fff; }
+  .site-footer .btn-primary:hover { background: var(--thrive-orange-dark); transform: translateY(-1px); color: #fff; }
+
+  .footer-bg {
+    position: absolute; top: 50%; right: -120px; transform: translateY(-50%);
+    width: 620px; height: 620px; pointer-events: none; z-index: 0; opacity: 1; display: block;
+  }
+  .footer-bg img {
+    width: 100%; height: 100%; object-fit: contain;
+    filter: brightness(0) saturate(100%) invert(22%) sepia(8%) saturate(900%) hue-rotate(10deg) brightness(95%) contrast(85%);
+    opacity: .55;
+  }
+  .footer-main { position: relative; z-index: 1; padding: 64px 24px 40px; }
+  .footer-grid { display: grid; grid-template-columns: 1.05fr 1.4fr 0.95fr; gap: 56px; align-items: start; }
+
+  .footer-brand .footer-logo { display: inline-block; line-height: 0; margin-bottom: 18px; }
+  .footer-brand .footer-logo svg { display: block; height: 56px; width: auto; }
+  .footer-h2 { color: #fff; font-size: clamp(34px, 3.4vw, 44px); line-height: 1.05; letter-spacing: -0.025em; font-weight: 800; margin: 0 0 22px; }
+  .footer-h2 em { font-style: normal; font-weight: 800; color: #7D963D; }
+  .footer-desc { color: rgba(246,241,230,.78); font-size: 14px; line-height: 1.65; margin: 0 0 26px; max-width: 460px; }
+  .footer-desc strong { color: #fff; font-weight: 700; }
+  .footer-social { list-style: none; padding: 0; margin: 0; display: flex; gap: 10px; }
+  .footer-social a {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,.08); color: #f6f1e6;
+    transition: background-color 160ms ease, transform 160ms ease, color 160ms ease;
+  }
+  .footer-social a:hover { background: #7D963D; color: #2f3e0f; transform: translateY(-1px); }
+  .footer-social a:focus-visible { outline: 2px solid #7D963D; outline-offset: 2px; }
+
+  .footer-cities { padding-top: 78px; }
+  .cities-label { display: flex; align-items: center; gap: 8px; color: #7D963D; font-size: 14px; font-weight: 700; margin: 0 0 22px; }
+  .cities-label svg { display: inline-block; }
+  .cities-grid { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px 24px; }
+  .cities-grid li { margin: 0; }
+  .cities-grid a { color: rgba(246,241,230,.85); font-size: 14px; font-weight: 400; text-decoration: none; transition: color 140ms ease; }
+  .cities-grid a:hover { color: #7D963D; }
+  .cities-grid a:focus-visible { outline: 2px solid #7D963D; outline-offset: 2px; border-radius: 2px; }
+
+  .footer-cta { padding-top: 56px; }
+  .cta-card {
+    position: relative; background: #fff; border-radius: 18px; padding: 26px 28px 28px;
+    color: var(--ink); box-shadow: 0 30px 50px -28px rgba(0,0,0,.45); overflow: hidden; isolation: isolate; min-height: 240px;
+  }
+  .cta-content { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; }
+  .cta-h3 { color: var(--ink); font-size: 22px; font-weight: 800; letter-spacing: -0.01em; margin: 0 0 10px; }
+  .cta-text { color: var(--ink-soft); font-size: 14px; line-height: 1.5; margin: 0 0 18px; max-width: 220px; }
+  .cta-btn { height: 42px; padding: 0 22px; font-size: 13px; line-height: 1; margin-bottom: 16px; letter-spacing: 0.04em; }
+  .cta-phone { display: inline-block; color: var(--thrive-orange); font-weight: 700; font-size: 19px; letter-spacing: -0.005em; text-decoration: none; transition: color 140ms ease; position: relative; z-index: 3; }
+  .cta-phone:hover { color: var(--thrive-orange-dark); }
+  .cta-tree { position: absolute; right: -34px; bottom: -28px; width: 140px; height: 140px; pointer-events: none; z-index: 0; opacity: 1; }
+  .cta-tree img { width: 100%; height: 100%; object-fit: contain; }
+
+  .footer-bottom { position: relative; z-index: 1; padding: 22px 24px 28px; border-top: 1px solid rgba(246,241,230,.12); }
+  .footer-bottom p { margin: 0; color: rgba(246,241,230,.7); font-size: 13px; line-height: 1.6; display: flex; flex-wrap: wrap; align-items: center; gap: 0 6px; }
+  .footer-bottom a { color: rgba(246,241,230,.7); text-decoration: none; transition: color 140ms ease; }
+  .footer-bottom a:hover { color: #7D963D; }
+  .footer-bottom .sep { color: rgba(246,241,230,.32); margin: 0 4px; }
+
+  @media (max-width: 980px) {
+    .footer-grid { grid-template-columns: 1fr; gap: 48px; }
+    .footer-cities { padding-top: 0; }
+    .footer-cta { padding-top: 0; max-width: 380px; }
+    .footer-desc { max-width: none; }
+    .footer-bg { width: 360px; opacity: .05; right: -120px; }
+  }
+  @media (max-width: 640px) {
+    .footer-main { padding: 48px 24px 32px; }
+    .footer-h2 { font-size: 32px; }
+    .cities-grid { grid-template-columns: repeat(2, 1fr); gap: 12px 18px; }
+    .footer-bottom p { font-size: 12px; gap: 0 4px; }
+    .footer-bottom .sep { margin: 0 2px; }
+  }
+</style>

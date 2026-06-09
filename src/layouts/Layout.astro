@@ -1,0 +1,39 @@
+---
+import '../styles/global.css';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import { getHeader, getNavItems, getMegaMenus, getResultCards } from '../lib/directus';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+const { title, description } = Astro.props;
+const path = Astro.url.pathname;
+const [header, navItems, megaMenus, resultCards] = await Promise.all([
+  getHeader(),
+  getNavItems(),
+  getMegaMenus(),
+  getResultCards(),
+]);
+---
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://use.typekit.net/onm8nad.css" />
+    <link rel="stylesheet" href="/fonts/proximanova.css" />
+    {description && <meta name="description" content={description} />}
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+  </head>
+  <body class="bg-white text-slate-900 font-sans antialiased" style="font-family:'proximanova','proxima-nova-1',Arial,sans-serif;">
+    <SiteHeader header={header} navItems={navItems} megaMenus={megaMenus} resultCards={resultCards} path={path} />
+    <slot />
+    <SiteFooter />
+  </body>
+</html>

@@ -1,0 +1,59 @@
+---
+export const prerender = false; // Live SSR — Directus changes reflect on refresh
+
+import Layout from '../layouts/Layout.astro';
+
+// Shape of the contact_page singleton we built in the Directus admin UI.
+// (links-qiyd50 is a presentation button — it stores no data, so it's not here.)
+type ContactPage = {
+  full_name?: string;
+  email?: string;
+  description?: string;
+  map_location?: { coordinates?: number[] } | null;
+};
+
+// Fetch the content from Directus (fail-safe: page never crashes if Directus is down)
+let data: ContactPage | null = null;
+try {
+  const res = await fetch(`${import.meta.env.DIRECTUS_URL}/items/contact_page`, {
+    headers: { Authorization: `Bearer ${import.meta.env.DIRECTUS_STATIC_TOKEN}` },
+  });
+  if (res.ok) data = (await res.json()).data as ContactPage;
+} catch {
+  data = null;
+}
+
+// Map field comes back as a GeoJSON Point: { coordinates: [lng, lat] }
+const coords = Array.isArray(data?.map_location?.coordinates) ? data!.map_location!.coordinates! : [];
+const [lng, lat] = coords;
+const hasMap = lng !== undefined && lat !== undefined;
+---
+
+<Layout title={(data?.full_name ?? 'Contact') + ' | Contact'} description={data?.description}>
+  <section class="max-w-3xl mx-auto px-4 py-20">
+    <div class="text-center">
+      <span class="text-[#7ab317] font-extrabold uppercase tracking-wider text-sm">Get In Touch</span>
+      <h1 class="text-4xl md:text-5xl font-extrabold mt-3 text-slate-900">{data?.full_name ?? 'Contact Us'}</h1>
+      <p class="mt-4 text-slate-600 text-lg">{data?.description}</p>
+      {data?.email && (
+        <a
+          href={'mailto:' + data.email}
+          class="mt-6 inline-block rounded-full bg-[#7ab317] hover:bg-[#6a9a13] transition-colors text-white font-bold px-7 py-3"
+        >
+          {data.email}
+        </a>
+      )}
+    </div>
+
+    {hasMap && (
+      <iframe
+        title="Office location"
+        class="mt-12 w-full rounded-2xl shadow-md border border-slate-100"
+        height="380"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        src={`https://www.google.com/maps?q=${lat},${lng}&z=14&output=embed`}
+      ></iframe>
+    )}
+  </section>
+</Layout>

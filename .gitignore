@@ -1,0 +1,24 @@
+# build output
+dist/
+.output/
+
+# dependencies
+node_modules/
+
+# astro generated types
+.astro/
+
+# environment (commit .env.template instead)
+.env
+.env.production
+.env.local
+
+# logs / os
+*.log
+.DS_Store
+
+# local backup artifacts (git history replaces these)
+.backups/
+
+# nested duplicate project copy — excluded from version control
+Astro_thrive_directus/

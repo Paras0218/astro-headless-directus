@@ -1,0 +1,307 @@
+---
+import { Icon } from 'astro-icon/components';
+import { getServicesPromo } from '../lib/directus';
+import type { HeaderData, NavItem, MegaCategory, ResultCard } from '../lib/directus';
+
+interface Props {
+  header: HeaderData;
+  navItems: NavItem[];
+  megaMenus: Record<string, MegaCategory[]>;
+  resultCards: Record<string, ResultCard[]>;
+  path?: string;
+}
+const { header, navItems, megaMenus, resultCards, path = '' } = Astro.props;
+const telHref = 'tel:' + header.phone.replace(/[^0-9+]/g, '');
+
+// Green "Experience Real Results" promo shown on the left of the SERVICES mega-menu.
+// Fetched here so it appears on every page using this header (Layout + index) without prop drilling.
+const servicesPromo = await getServicesPromo();
+
+// Computed in the frontmatter so the template never contains a "<" operator
+// (Astro's template parser treats "<" as the start of a tag).
+function usedColsOf(mega: MegaCategory[]): number[] {
+  return [1, 2, 3, 4].filter((col) => mega.some((c) => c.column === col));
+}
+function gridClassFor(mega: MegaCategory[]): string {
+  const n = usedColsOf(mega).length;
+  if (n <= 1) return 'grid-cols-1 max-w-xs';
+  if (n === 2) return 'grid-cols-1 sm:grid-cols-2 max-w-2xl';
+  if (n === 3) return 'grid-cols-2 md:grid-cols-3 max-w-5xl';
+  return 'grid-cols-2 md:grid-cols-4 max-w-7xl';
+}
+// Column grid when a side panel (promo on the left, results on the right) shares the row.
+function sideGridClass(n: number): string {
+  if (n <= 1) return 'grid-cols-1';
+  if (n === 2) return 'grid-cols-1 sm:grid-cols-2';
+  if (n === 3) return 'grid-cols-1 md:grid-cols-3';
+  return 'grid-cols-2 md:grid-cols-4';
+}
+---
+<header class="sticky top-0 z-[9999] bg-white shadow-[0_4px_10px_rgba(0,0,0,0.10)]">
+  <nav class="w-full max-w-full px-5 h-20 flex items-center justify-between gap-4">
+    <!-- Logo -->
+    <a href="/" class="flex items-center shrink-0" aria-label={header.logo_text}>
+      <img src={header.logo_url} alt={header.logo_text} width="612" height="356" class="h-12 w-auto" />
+    </a>
+
+    <!-- Menu (center) -->
+    <div class="hidden lg:flex flex-1 items-stretch justify-evenly text-[16px] font-extrabold tracking-wide text-[#3a3a3a]">
+      {navItems.map((item) => {
+        const cards = resultCards[item.label];
+        const hasCards = Array.isArray(cards) && cards.length > 0;
+        const mega = megaMenus[item.label];
+        const hasMega = Array.isArray(mega) && mega.length > 0;
+        const usedCols = Array.isArray(mega) ? usedColsOf(mega) : [];
+        const gridClass = Array.isArray(mega) ? gridClassFor(mega) : '';
+        const showPromo = (item.label || '').toUpperCase() === 'SERVICES' && servicesPromo.enabled;
+        // LOCAL-style menu: link columns AND a right "Results" sidebar of image cards.
+        const showResults = hasMega && hasCards;
+        const hasSide = showPromo || showResults;
+        return (
+          <div class="group relative flex items-center">
+            <a
+              href={item.url}
+              class:list={[
+                'flex items-center h-20',
+                item.url !== '#' && item.url !== '/' && path === item.url ? 'text-[#7ab317]' : 'text-[#3a3a3a]',
+              ]}
+            >
+              <span class="flex items-center gap-1.5 px-4 py-2 rounded-md transition-colors duration-200 group-hover:bg-[#e0ecca] group-hover:text-black">
+                {item.label}
+                {item.has_dropdown ? (
+                  <Icon name="lucide:chevron-down" class="w-4 h-4 nav-chev" />
+                ) : null}
+              </span>
+            </a>
+
+            {hasCards && !hasMega ? (
+              <div class="fixed left-0 right-0 top-20 hidden group-hover:block z-[9998]">
+                <div class="bg-white megapanel shadow-[0_16px_24px_-14px_rgba(0,0,0,0.18)]">
+                  <div class="w-full px-5 py-8 flex flex-wrap gap-4 justify-center">
+                    {cards.map((card) => (
+                      <a href={card.url} class="block w-[230px] rounded-lg overflow-hidden shrink-0 group/card shadow-sm">
+                        <img src={card.image_url} alt={card.title} class="block w-full aspect-[290/123] object-cover transition-transform duration-300 group-hover/card:scale-105" />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : hasMega ? (
+              <div class="fixed left-0 right-0 top-20 hidden group-hover:block z-[9998]">
+                <div class="bg-white megapanel shadow-[0_16px_24px_-14px_rgba(0,0,0,0.18)] max-h-[calc(100vh-5rem)] overflow-y-auto">
+                  <div class="w-full px-5 py-8">
+                   <div class:list={[hasSide ? 'flex gap-8 items-start' : '']}>
+                    {showPromo ? (
+                      <aside
+                        class="w-[350px] shrink-0 relative overflow-hidden rounded-[20px] p-5 text-white"
+                        style={`background-color:#7d963d;background-image:url(${servicesPromo.phone_image});background-repeat:no-repeat;background-position:center bottom;background-size:100% auto;`}
+                      >
+                        <div class="relative z-10">
+                          <h3 class="text-[31px] leading-[1.15] font-extrabold m-0 tracking-[-0.018em] [text-wrap:balance]">{servicesPromo.heading}</h3>
+                          <img src={servicesPromo.group_image} alt="" width="119" height="109" class="absolute top-[-4px] right-0 w-[110px] h-auto" loading="lazy" decoding="async" />
+                        </div>
+                        <p class="relative z-10 mt-2.5 text-[15px] leading-[21px] text-white m-0 max-w-[215px]">{servicesPromo.description}</p>
+
+                        <form action={servicesPromo.button_url} method="get" class="relative z-10 mt-4">
+                          <div class="relative">
+                            <img src="/assets/menu/services/email-globe-icon.png" alt="" width="18" height="18" class="absolute left-[13px] top-1/2 -translate-y-1/2 w-[18px] h-[18px] pointer-events-none" />
+                            <input name="website" type="text" autocomplete="off" aria-label="Website address" placeholder={servicesPromo.input_placeholder}
+                              class="w-full h-[45px] rounded-[5px] border border-[#dddddd] bg-white pl-10 pr-3 text-[15px] text-[#555] lowercase placeholder:normal-case focus:outline-none" />
+                          </div>
+                          <button type="submit" class="mt-1 w-full rounded-[42px] border-2 border-white bg-[#db7803] hover:bg-[#c26a00] transition-colors text-white uppercase font-extrabold text-[14px] tracking-[1px] py-[13px] leading-none">{servicesPromo.button_text}</button>
+                        </form>
+
+                        <div class="relative z-10 mt-9">
+                          <div class="flex items-center justify-between mb-[88px]">
+                            <img src={servicesPromo.logo_image} alt="RecNation" width="120" height="62" class="h-[42px] w-auto" loading="lazy" decoding="async" />
+                            <div class="text-right leading-none">
+                              <div class="text-[26px] font-extrabold">{servicesPromo.stat1_value}</div>
+                              <div class="mt-1 text-[13px]">{servicesPromo.stat1_label}</div>
+                            </div>
+                          </div>
+                          <div class="flex justify-end mb-[88px]">
+                            <div class="text-right leading-none">
+                              <div class="text-[26px] font-extrabold">{servicesPromo.stat2_value}</div>
+                              <div class="mt-1 text-[13px]">{servicesPromo.stat2_label}</div>
+                            </div>
+                          </div>
+                          <div class="leading-none">
+                            <div class="text-[26px] font-extrabold">{servicesPromo.stat3_value}</div>
+                            <div class="mt-1 text-[13px]">{servicesPromo.stat3_label}</div>
+                          </div>
+                        </div>
+                      </aside>
+                    ) : null}
+                    <div class:list={[hasSide ? 'flex-1 min-w-0' : '']}>
+                    <div class:list={['grid gap-x-10 gap-y-8 items-start', hasSide ? sideGridClass(usedCols.length) : gridClass + ' mx-auto']}>
+                      {usedCols.map((col) => (
+                        <div class="space-y-6">
+                          {mega.filter((c) => c.column === col).map((cat) =>
+                            cat.links.length > 0 ? (
+                              <div>
+                                <div class="flex items-center gap-2 mb-3">
+                                  {cat.image ? (
+                                    <img src={cat.image} alt={cat.title} width="25" height="25" class="w-[22px] h-[22px] object-contain shrink-0" loading="lazy" decoding="async" />
+                                  ) : (
+                                    <Icon name={'lucide:' + cat.icon} class="w-5 h-5 text-[#7ab317] shrink-0" />
+                                  )}
+                                  {cat.url ? (
+                                    <a href={cat.url} class="font-extrabold text-[#333] text-sm leading-tight tracking-normal rounded-md -ml-2 px-2 py-1 -my-1 transition-colors hover:bg-[#e0ecca] hover:text-black">{cat.title}</a>
+                                  ) : (
+                                    <h4 class="font-extrabold text-[#333] text-sm leading-tight tracking-normal rounded-md -ml-2 px-2 py-1 -my-1 transition-colors hover:bg-[#e0ecca] hover:text-black">{cat.title}</h4>
+                                  )}
+                                </div>
+                                <ul class="space-y-1.5 list-disc pl-5 m-0 marker:text-[#555]">
+                                  {cat.links.map((l) => (
+                                    <li class="text-[15px] leading-snug">
+                                      <a href={l.url} class="font-medium tracking-normal text-[#49453b] hover:text-[#7ab317] transition-colors">{l.label}</a>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ) : (
+                              <a href={cat.url || '#'} class="flex items-center gap-2.5 font-extrabold text-[#333] text-sm tracking-normal">
+                                {cat.image ? (
+                                  <img src={cat.image} alt={cat.title} width="25" height="25" class="w-[22px] h-[22px] object-contain shrink-0" loading="lazy" decoding="async" />
+                                ) : (
+                                  <Icon name={'lucide:' + cat.icon} class="w-5 h-5 text-[#7ab317] shrink-0" />
+                                )}
+                                <span class="rounded-md -ml-2.5 px-2.5 py-1 -my-1 transition-colors hover:bg-[#e0ecca] hover:text-black">{cat.title}</span>
+                              </a>
+                            )
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    </div>
+                    {showResults ? (
+                      <aside class="w-[300px] shrink-0">
+                        <div class="text-right text-[12px] font-extrabold tracking-[0.5px] text-[#333] uppercase mb-3">RESULTS</div>
+                        <div class="space-y-3">
+                          {cards.map((card) => (
+                            <a href={card.url} class="block rounded-[10px] overflow-hidden group/card shadow-sm">
+                              <img src={card.image_url} alt={card.title} class="block w-full aspect-[290/123] object-cover transition-transform duration-300 group-hover/card:scale-105" loading="lazy" decoding="async" />
+                            </a>
+                          ))}
+                        </div>
+                      </aside>
+                    ) : null}
+                   </div>
+                  </div>
+                </div>
+              </div>
+            ) : item.subitems.length > 0 ? (
+              <div class="absolute left-0 top-full hidden group-hover:block pt-1 z-50">
+                <div class="bg-white shadow-[0_12px_30px_rgba(0,0,0,0.15)] rounded-md dropbox min-w-[230px] py-2">
+                  {item.subitems.map((sub) => (
+                    <a href={sub.url} class="block px-5 py-2.5 text-[13px] font-bold tracking-normal text-[#3a3a3a] hover:text-[#7ab317] hover:bg-slate-50 transition-colors">{sub.label}</a>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
+        );
+      })}
+    </div>
+
+    <!-- Right: phone + search + mobile toggle -->
+    <div class="flex items-center gap-3 shrink-0">
+      <a href={telHref} class="hidden md:flex items-center gap-2 text-[#7ab317] hover:text-[#b56120] transition-colors font-extrabold text-lg">
+        <span class="w-9 h-9 rounded-full bg-[#eef4e0] flex items-center justify-center">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.24c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.3.2 2.5.57 3.6a1 1 0 0 1-.25 1l-2.2 2.2z"/></svg>
+        </span>
+        {header.phone}
+      </a>
+      <button type="button" aria-label="Search" class="w-10 h-10 rounded-full bg-[#7ab317] text-white flex items-center justify-center hover:bg-[#6a9a13] transition-colors">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      </button>
+      <button type="button" data-mobile-toggle aria-label="Menu" class="lg:hidden w-10 h-10 flex items-center justify-center text-[#333]">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile menu -->
+  <div id="mobileMenu" class="lg:hidden hidden border-t border-slate-100 bg-white max-h-[75vh] overflow-y-auto">
+    <div class="px-4 py-3 flex flex-col">
+      {navItems.map((item) => {
+        const cards = resultCards[item.label];
+        const hasCards = Array.isArray(cards) && cards.length > 0;
+        const mega = megaMenus[item.label];
+        const hasMega = Array.isArray(mega) && mega.length > 0;
+        return (
+          <>
+            <a href={item.url} class="py-2.5 text-sm font-extrabold tracking-wide text-[#333] hover:text-[#7ab317]">{item.label}</a>
+            {hasMega
+              ? mega.map((cat) => (
+                  <>
+                    {cat.links.length > 0 ? (
+                      <div class="pl-3 pt-2 text-[11px] font-extrabold uppercase tracking-wide text-slate-400">{cat.title}</div>
+                    ) : (
+                      <a href={cat.url || '#'} class="py-2 pl-3 text-sm font-extrabold text-[#333] hover:text-[#7ab317]">{cat.title}</a>
+                    )}
+                    {cat.links.map((l) => (
+                      <a href={l.url} class="py-1 pl-5 text-[13px] text-slate-600 hover:text-[#7ab317]">{l.label}</a>
+                    ))}
+                  </>
+                ))
+              : hasCards
+                ? cards.map((card) => (
+                    <a href={card.url} class="py-1.5 pl-4 text-[13px] font-semibold text-slate-600 hover:text-[#7ab317]">{card.title}</a>
+                  ))
+                : item.subitems.map((sub) => (
+                    <a href={sub.url} class="py-1.5 pl-4 text-[13px] font-semibold text-slate-500 hover:text-[#7ab317]">{sub.label}</a>
+                  ))}
+            {hasMega && hasCards
+              ? cards.map((card) => (
+                  <a href={card.url} class="py-1.5 pl-4 text-[13px] font-semibold text-slate-600 hover:text-[#7ab317]">{card.title}</a>
+                ))
+              : null}
+          </>
+        );
+      })}
+      <a href={telHref} class="py-2.5 text-sm font-extrabold text-[#7ab317] hover:text-[#b56120] transition-colors">{header.phone}</a>
+    </div>
+  </div>
+</header>
+
+<script>
+  const toggle = document.querySelector('[data-mobile-toggle]');
+  const menu = document.getElementById('mobileMenu');
+  toggle?.addEventListener('click', () => menu?.classList.toggle('hidden'));
+</script>
+
+<style>
+  /* Self-contained so the header renders IDENTICALLY on every page, whether or not
+     the page loads Tailwind preflight (the homepage uses tw-utilities = no @tailwind base). */
+  header { font-family: 'proximanova', 'proxima-nova-1', Arial, sans-serif; }
+  /* Tailwind border utilities only set border-width; border-style:solid comes from
+     preflight (absent on the homepage). Set these hairlines explicitly so they match. */
+  .megapanel { border-top: 1px solid #e6e8eb; }
+  .dropbox { border: 1px solid #eef1f4; }
+  /* Chevron flips to "up" on hover. Explicit transform (not Tailwind rotate-180)
+     so it works on the homepage too, which has no Tailwind preflight to init the
+     transform CSS variables. */
+  .nav-chev { transition: transform .45s cubic-bezier(0.22, 1, 0.36, 1); transform-origin: center; will-change: transform; }
+  .group:hover .nav-chev { transform: rotate(-180deg); }
+</style>
+
+<style is:global>
+  /* SINGLE SOURCE OF TRUTH for header form-control resets.
+     The homepage bundles Tailwind WITHOUT @tailwind base (preflight); all other
+     routes use global.css WITH preflight. Replicate the preflight subset the header
+     relies on — scoped under <header>, element-level (specificity 0,0,2) so Tailwind
+     utility classes (0,1,0) still win — so the one SiteHeader renders IDENTICALLY on
+     every route. Without this, the search button + mega-menu promo show UA borders,
+     UA backgrounds, and the wrong font on the homepage only. */
+  header button, header input, header optgroup, header select, header textarea {
+    font-family: inherit; font-size: 100%; font-weight: inherit; line-height: inherit; color: inherit; margin: 0; padding: 0;
+  }
+  header button, header input, header select, header textarea {
+    border-width: 0; border-style: solid; border-color: currentColor;
+  }
+  header button, header [type='button'], header [type='submit'] {
+    -webkit-appearance: button; background-color: transparent; background-image: none; cursor: pointer;
+  }
+  header input::placeholder, header textarea::placeholder { color: #9ca3af; opacity: 1; }
+</style>

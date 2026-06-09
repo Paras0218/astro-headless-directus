@@ -1,0 +1,71 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getAbout } from '../lib/directus';
+
+export const prerender = false;
+
+const about = await getAbout();
+
+const stats = [
+  { value: about.stat1_value, label: about.stat1_label },
+  { value: about.stat2_value, label: about.stat2_label },
+  { value: about.stat3_value, label: about.stat3_label },
+  { value: about.stat4_value, label: about.stat4_label },
+];
+---
+<Layout title={about.seo_title} description={about.seo_description}>
+  <!-- Hero -->
+  <section class="py-24 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 text-white">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+      <span class="text-orange-500 font-bold uppercase tracking-wider text-sm">{about.hero_eyebrow}</span>
+      <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mt-4 mb-6 leading-tight">
+        {about.hero_heading}
+      </h1>
+      <p class="text-slate-300 text-lg max-w-2xl mx-auto">
+        {about.hero_subheading}
+      </p>
+    </div>
+  </section>
+
+  <!-- Story -->
+  <section class="py-24 bg-white">
+    <div class="max-w-3xl mx-auto px-4">
+      <h2 class="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl mb-6">{about.story_heading}</h2>
+      <p class="text-lg text-slate-600 leading-relaxed whitespace-pre-line">{about.story_body}</p>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="py-20 bg-slate-900 text-white">
+    <div class="max-w-6xl mx-auto px-4 grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+      {stats.map((stat) => (
+        <div>
+          <div class="text-4xl md:text-5xl font-extrabold text-orange-500">{stat.value}</div>
+          <div class="mt-2 text-sm text-slate-300 uppercase tracking-wide">{stat.label}</div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Mission -->
+  <section class="py-24 bg-slate-50">
+    <div class="max-w-3xl mx-auto px-4 text-center">
+      <h2 class="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl mb-6">{about.mission_heading}</h2>
+      <p class="text-lg text-slate-600 leading-relaxed whitespace-pre-line">{about.mission_body}</p>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-24 bg-gradient-to-br from-orange-600 to-orange-700 text-white">
+    <div class="max-w-3xl mx-auto px-4 text-center">
+      <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight mb-4">{about.cta_heading}</h2>
+      <p class="text-lg text-orange-50 mb-8 max-w-xl mx-auto">{about.cta_text}</p>
+      <a
+        href={about.cta_button_url}
+        class="inline-block bg-white text-orange-700 font-bold py-3 px-8 rounded-lg shadow-md hover:bg-orange-50 transition-colors duration-200"
+      >
+        {about.cta_button_label}
+      </a>
+    </div>
+  </section>
+</Layout>

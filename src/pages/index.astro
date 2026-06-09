@@ -1,0 +1,2182 @@
+---
+import '../styles/tw-utilities.css';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import {
+  getHeader, getNavItems, getMegaMenus, getResultCards, getHomepage,
+  getHomeResults, getHomeWins, getHomeAiv, getHomeTools, getHomeValues, getTestimonials,
+} from '../lib/directus';
+
+export const prerender = false;
+
+const [header, navItems, megaMenus, resultCards, home, results, wins, aivCards, tools, values, testimonials] = await Promise.all([
+  getHeader(), getNavItems(), getMegaMenus(), getResultCards(), getHomepage(),
+  getHomeResults(), getHomeWins(), getHomeAiv(), getHomeTools(), getHomeValues(), getTestimonials(),
+]);
+
+const title = home.seo_title;
+const description = home.seo_description;
+const heroTrust = home.hero_trust_list.split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
+const valueIcons = [
+  '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v7c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V5l-8-3z"/></svg>',
+  '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18"/><path d="M12 3a14 14 0 0 0 0 18"/></svg>',
+  '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
+];
+const toolClasses = ['gr-card-score', 'gr-card-stats', 'gr-card-ai', 'gr-card-growth', 'gr-card-local'];
+const toolIds = ['grow-score', 'grow-stats', 'grow-ai', 'grow-growth', 'grow-local'];
+const toolVisualClasses = ['gr-card-visual-score', 'gr-card-visual-stats', 'gr-card-visual-ai', 'gr-card-visual-growth', 'gr-card-visual-local'];
+const toolsRendered = tools.map((t) => ({ ...t, body_html: t.body_html.includes('<p') ? t.body_html : `<p>${t.body_html}</p>` }));
+---
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>{title}</title>
+<meta name="description" content={description} />
+<meta property="og:type" content="website" />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<link rel="icon" type="image/png" href="/favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;600&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://use.typekit.net/onm8nad.css" />
+<link rel="stylesheet" href="/fonts/proximanova.css" />
+<link rel="stylesheet" href="/styles.css?v=2026052902" />
+<script is:inline>
+  // Lead form -> thrive-form-receiver (Render) -> Zoho REST + Resend + PostHog.
+  // Reusing the /forms/hvac-form endpoint; landing_page=home distinguishes leads.
+  window.thriveZohoForm = {
+    receiverUrl: 'https://thrive-form-receiver.onrender.com/forms/hvac-form',
+  };
+</script>
+<script is:inline src="/utm-capture.js" defer></script>
+<script is:inline src="/analytics.js" defer></script>
+<script is:inline src="/google-ads.js" defer></script>
+<script is:inline>
+  // BugHerd gated, only loads when ?bugherd=1 in URL OR cookie set
+  (function () {
+    var qs = new URLSearchParams(window.location.search);
+    if (qs.get('bugherd') === '1') {
+      try { document.cookie = 'thrive_bugherd=1; path=/; max-age=86400; samesite=lax'; } catch (e) {}
+    }
+    if (qs.get('bugherd') === '0') {
+      try { document.cookie = 'thrive_bugherd=; path=/; max-age=0; samesite=lax'; } catch (e) {}
+      return;
+    }
+    var enabled = qs.get('bugherd') === '1' || /(?:^|;\s*)thrive_bugherd=1/.test(document.cookie);
+    if (!enabled) return;
+    var s = document.createElement('script');
+    s.src = 'https://www.bugherd.com/sidebarv2.js?apikey=r8parwkahxw0s0yhsj4weg';
+    s.async = true;
+    document.head.appendChild(s);
+  })();
+</script>
+<script is:inline src="/fraud-blocker.js" defer></script>
+<noscript><a href="https://fraudblocker.com" rel="nofollow"><img src="https://monitor.fraudblocker.com/fbt.gif?sid=XyA-dNMcQyzmox2s7K14D" alt="Fraud Blocker" /></a></noscript>
+</head>
+<body>
+
+<!-- ============== 01 Sticky header ============== -->
+<SiteHeader header={header} navItems={navItems} megaMenus={megaMenus} resultCards={resultCards} path="/" />
+
+<!-- ============== 02 Hero, content left, form right ============== -->
+<section class="hero hero-home">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div class="hero-left">
+        <span class="urg-pill urg-pill-green"><span class="dot"></span>{home.hero_eyebrow}</span>
+        <h1>{home.hero_heading_pre} <em>{home.hero_heading_em}</em></h1>
+        <p class="hero-sub">{home.hero_sub}</p>
+        <ul class="trust-list">
+          {heroTrust.map((t) => (
+            <li><span class="check"></span>{t}</li>
+          ))}
+        </ul>
+        <div class="hero-team">
+          <div class="hero-team-photos">
+            <img src="/assets/Headshots/Ashton-Dobbs-1.png" alt="Ashton Dobbs, Senior Marketing Consultant" width="56" height="56" />
+            <img src="/assets/Headshots/Kevin-Kluge.png" alt="Kevin Kluge, Senior Marketing Consultant" width="56" height="56" />
+            <img src="/assets/Headshots/Sean.png" alt="Sean, Senior Marketing Consultant" width="56" height="56" />
+            <img src="/assets/Headshots/Taylor-Rosthenhausler.png" alt="Taylor Rosthenhausler, Senior Marketing Consultant" width="56" height="56" />
+          </div>
+          <p class="hero-team-label">{home.hero_team_label}</p>
+        </div>
+      </div>
+
+      <div class="hero-media">
+        <div class="lead-form-card">
+          <div class="lf-eyebrow"><span class="pulse"></span><span>{home.form_eyebrow}</span></div>
+          <h2 class="lf-headline">{home.form_headline}</h2>
+          <p class="lf-sub">{home.form_sub}</p>
+          <form id="contactForm" class="contact-form" novalidate data-thrive-form>
+            <input type="hidden" id="zc_gad" name="zc_gad" value="" />
+            <input type="hidden" name="utm_source" value="">
+            <input type="hidden" name="utm_medium" value="">
+            <input type="hidden" name="utm_campaign" value="">
+            <input type="hidden" name="utm_content" value="">
+            <input type="hidden" name="utm_term" value="">
+            <input type="hidden" name="gclid" value="">
+            <input type="hidden" name="referrer" value="">
+            <input type="hidden" name="landing_page" value="home">
+
+            <div class="form-row">
+              <label class="field">
+                <span class="field-label">First Name <span class="req">*</span></span>
+                <input name="first_name" type="text" required autocomplete="given-name" />
+              </label>
+              <label class="field">
+                <span class="field-label">Last Name <span class="req">*</span></span>
+                <input name="last_name" type="text" required autocomplete="family-name" />
+              </label>
+            </div>
+
+            <div class="form-row">
+              <label class="field">
+                <span class="field-label">Company / Organization <span class="req">*</span></span>
+                <input name="company" type="text" required autocomplete="organization" />
+              </label>
+              <label class="field">
+                <span class="field-label">Website</span>
+                <input name="website" type="url" autocomplete="url" placeholder="yourcompany.com" />
+              </label>
+            </div>
+
+            <div class="form-row">
+              <label class="field">
+                <span class="field-label">Email <span class="req">*</span></span>
+                <input name="email" type="email" required autocomplete="email" placeholder="you@company.com" />
+              </label>
+              <label class="field">
+                <span class="field-label">Phone</span>
+                <input name="phone" type="tel" autocomplete="tel" placeholder="(555) 555-5555" />
+              </label>
+            </div>
+
+            <div class="form-row">
+              <label class="field">
+                <span class="field-label">Monthly Marketing Budget <span class="req">*</span></span>
+                <!-- Values mirror Zoho CRM Lead.Monthly_Marketing_Budget picklist exactly so the lead-create call doesn't normalize. -->
+                <select name="budget" required>
+                  <option value="">Select…</option>
+                  <option value="Under $750">Under $750</option>
+                  <option value="$750 - $1,500">$750-$1,500</option>
+                  <option value="$1,500-$3,000">$1,500-$3,000</option>
+                  <option value="$3,000-$7,000">$3,000-$7,000</option>
+                  <option value="$7,000 - $15,000">$7,000-$15,000</option>
+                  <option value="$15,000 - $25,000">$15,000-$25,000</option>
+                  <option value="$25,000 - $50,000">$25,000-$50,000</option>
+                  <option value="$50,000 - $100,000">$50,000-$100,000</option>
+                  <option value="Above $100,000">Above $100,000</option>
+                </select>
+              </label>
+              <label class="field">
+                <span class="field-label">Company Size <span class="req">*</span></span>
+                <!-- Values mirror Zoho CRM Lead.Company_Size picklist. 200+ rolls up to "200-500+" since Zoho has no separate "+" bucket. -->
+                <select name="company_size" required>
+                  <option value="">Select…</option>
+                  <option value="1-20">1 - 20</option>
+                  <option value="20-50">20 - 50</option>
+                  <option value="50-100">50 - 100</option>
+                  <option value="100-200">100 - 200</option>
+                  <option value="200-500+">200+</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary btn-block">{home.form_button}</button>
+              <p class="form-fineprint">{home.form_fineprint}</p>
+            </div>
+          </form>
+
+          <div class="lf-success" hidden>
+            <div class="lf-success-check">✓</div>
+            <h3>{home.form_success_heading}</h3>
+            <p>{home.form_success_text}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== 03 Trust strip ============== -->
+<section class="trust-strip">
+  <div class="wrap">
+    <div class="ts-bar">
+      <div class="ts-bar-item">
+        <img class="ts-bar-logo" src="/assets/home/google-review-icon.svg" alt="Google" loading="lazy" />
+        <div class="ts-bar-meta">
+          <span class="ts-bar-num">{home.ts_google_num}</span>
+          <span class="ts-bar-stars" aria-hidden="true">★★★★★</span>
+          <span class="ts-bar-lab">Reviews</span>
+        </div>
+      </div>
+      <div class="ts-bar-item">
+        <img class="ts-bar-logo" src="/assets/home/clutch-reviewicon.svg" alt="Clutch" loading="lazy" />
+        <div class="ts-bar-meta">
+          <span class="ts-bar-num">{home.ts_clutch_num}</span>
+          <span class="ts-bar-stars" aria-hidden="true">★★★★★</span>
+          <span class="ts-bar-lab">Reviews</span>
+        </div>
+      </div>
+      <div class="ts-bar-item ts-bar-item-reviews">
+        <img class="ts-bar-faces" src="/assets/home/client-reviewgreen-bar.png" alt="Six client portraits" loading="lazy" />
+        <div class="ts-bar-meta ts-bar-meta-stack">
+          <a class="ts-bar-link" href={home.ts_reviews_url} target="_blank" rel="noopener">
+            {home.ts_reviews_text}
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M9 7h8v8"/></svg>
+          </a>
+          <span class="ts-bar-stars ts-bar-stars-lg" aria-hidden="true">★★★★★</span>
+        </div>
+      </div>
+    </div>
+    <div class="ts-logo-marquee" aria-label="Accreditations and partner badges">
+      <div class="ts-marquee-track">
+        <ul class="ts-marquee-row" aria-hidden="false">
+          <li><img src="/assets/Logos/Featured%207x.png" alt="Inc. 5000 Featured 7x" loading="lazy" /></li>
+          <li><img src="/assets/Logos/Microsoft%20Partner.png" alt="Microsoft Advertising Partner 2026" loading="lazy" /></li>
+          <li><img src="/assets/Logos/Meta%20Business%20Partner.png" alt="Meta Business Partner" loading="lazy" /></li>
+          <li><img src="/assets/Logos/IFA.png" alt="International Franchise Association Member" loading="lazy" /></li>
+          <li><img src="/assets/Logos/Shopify%20Partner.png" alt="Shopify Partner" loading="lazy" /></li>
+        </ul>
+        <ul class="ts-marquee-row" aria-hidden="true">
+          <li><img src="/assets/Logos/Featured%207x.png" alt="" loading="lazy" /></li>
+          <li><img src="/assets/Logos/Microsoft%20Partner.png" alt="" loading="lazy" /></li>
+          <li><img src="/assets/Logos/Meta%20Business%20Partner.png" alt="" loading="lazy" /></li>
+          <li><img src="/assets/Logos/IFA.png" alt="" loading="lazy" /></li>
+          <li><img src="/assets/Logos/Shopify%20Partner.png" alt="" loading="lazy" /></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== 03.5 Awards and recognition strip ============== -->
+<section class="awards-section">
+  <div class="wrap">
+    <span class="awards-eyebrow">{home.awards_eyebrow}</span>
+    <div class="awards-strip">
+      <img class="awards-desktop" src="/assets/Logo%20Strip.webp" alt="Industry accreditations: Google Partner Premier, Clutch, Forbes Agency Council, Top 10 Agency, Most Reviewed Digital Agencies, Gold Telly Award winner, The Manifest Top SEO Provider, Best Local SEO Top 10" />
+      <img class="awards-mobile" src="/assets/Logo%20Strip.webp" alt="Industry accreditations: Google Partner Premier, Clutch, Forbes Agency Council, Top 10 Agency, Most Reviewed Digital Agencies, Gold Telly Award winner, The Manifest Top SEO Provider, Best Local SEO Top 10" />
+    </div>
+  </div>
+</section>
+
+<!-- ============== 04 Client result videos ============== -->
+<section class="results-videos" id="results">
+  <div class="wrap">
+    <h2 class="section-h2">{home.results_h2}</h2>
+    <p class="section-sub">{home.results_sub}</p>
+
+    <div class="rv-grid">
+      {results.map((r) => (
+        <article class="rv-card">
+          <a class="rv-thumb" href={r.video_url} target="_blank" rel="noopener" aria-label={`Watch the ${r.attrib} case study on YouTube`}>
+            <img src={`https://img.youtube.com/vi/${r.video_id}/maxresdefault.jpg`} alt={`${r.attrib} case study video thumbnail`} loading="lazy" />
+          </a>
+          <div class="rv-body">
+            <p class="rv-quote"><em>{r.quote}</em></p>
+            <p class="rv-attrib">{r.attrib}</p>
+            <div class="rv-stats-wrap">
+              <span class="rv-stats-seal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" width="11" height="11" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                Verified Result
+              </span>
+              <ul class="rv-stats">
+                <li><strong class="rv-stat-num">{r.stat1_num}</strong><span class="rv-stat-lab">{r.stat1_lab}</span></li>
+                <li><strong class="rv-stat-num">{r.stat2_num}</strong><span class="rv-stat-lab">{r.stat2_lab}</span></li>
+                <li><strong class="rv-stat-num">{r.stat3_num}</strong><span class="rv-stat-lab">{r.stat3_lab}</span></li>
+              </ul>
+            </div>
+            <a class="rv-link" href={r.link_url} target="_blank" rel="noopener">{r.link_text}</a>
+          </div>
+        </article>
+      ))}
+    </div>
+
+    <div class="rv-cta">
+      <a class="btn btn-primary" href={home.results_cta_url} target="_blank" rel="noopener">{home.results_cta_text}</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============== 05 More Client Wins (6-card mini-strip) ============== -->
+<section class="wins-strip">
+  <div class="wrap">
+    <h2 class="section-h2">{home.wins_h2}</h2>
+    <p class="section-sub">{home.wins_sub}</p>
+
+    <div class="wins-grid">
+      {wins.map((w) => (
+        <article class="win-card">
+          <div class="win-head">
+            <span class="win-pill">{w.pill}</span>
+            <div class="win-logo">
+              <img src={w.logo} alt={w.pill} />
+            </div>
+          </div>
+          <div class="win-hero">
+            <span class="win-hero-num">{w.hero_num}</span>
+            <span class="win-hero-lab">{w.hero_lab}</span>
+          </div>
+          <ul class="win-stats">
+            <li><strong>{w.stat1.split('|')[0]}</strong> {w.stat1.split('|')[1]}</li>
+            <li><strong>{w.stat2.split('|')[0]}</strong> {w.stat2.split('|')[1]}</li>
+          </ul>
+          <div class="win-foot">
+            <p class="win-services">{w.services}</p>
+            <a class="win-link" href={w.link_url} target="_blank" rel="noopener">{w.link_text}</a>
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- ============== 06 Inc 5000 callout ============== -->
+<section class="inc5000-callout">
+  <div class="wrap">
+    <h2 class="inc-headline">{home.inc_headline}</h2>
+
+    <div class="inc-card">
+      <div class="inc-card-badge">
+        <img src="/assets/badge-inc-5000.webp" alt="Featured 7x on the Inc. 5000 list" width="320" height="220" />
+      </div>
+      <div class="inc-card-body" set:html={home.inc_body_html}></div>
+    </div>
+
+    <div class="inc-cta">
+      <a class="btn btn-primary" href={home.inc_cta_url}>{home.inc_cta_text}</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============== 06.5 Positioning + testimonial carousel ============== -->
+<section class="voices">
+  <div class="wrap">
+    <div class="voices-grid">
+      <div class="voices-copy">
+        <h2 class="section-h2 section-h2-left">{home.voices_h2}</h2>
+        <Fragment set:html={home.voices_body_html} />
+        <a class="btn btn-primary" href={home.voices_cta_url}>{home.voices_cta_text}</a>
+      </div>
+      <div class="voices-media">
+        <div class="testimonial-carousel" data-tc>
+          <div class="tc-stage" role="region" aria-roledescription="carousel" aria-label="Client testimonials">
+            {testimonials.map((t, i) => (
+              <img class:list={['tc-slide', i === 0 ? 'is-active' : '']} src={t.image} alt={t.alt} loading="lazy" />
+            ))}
+          </div>
+          <div class="tc-dots" role="tablist" aria-label="Choose testimonial">
+            {testimonials.map((t, i) => (
+              <button class:list={['tc-dot', i === 0 ? 'is-active' : '']} type="button" role="tab" aria-selected={i === 0 ? 'true' : 'false'} aria-label={`Show testimonial ${i + 1} of ${testimonials.length}`}></button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== 06.6 Best AI SEO Agency for AI Visibility ============== -->
+<section class="ai-visibility" id="ai-visibility">
+  <div class="wrap">
+    <div class="aiv-head">
+      <h2 class="aiv-h2">{home.aiv_h2_pre} <span class="aiv-rainbow">{home.aiv_h2_em}</span></h2>
+      <p class="aiv-sub">{home.aiv_sub}</p>
+    </div>
+
+    <div class="aiv-stats">
+      <div class="aiv-stat aiv-stat-blue">
+        <div class="aiv-stat-num">{home.aiv_stat1_num}</div>
+        <div class="aiv-stat-label">{home.aiv_stat1_lab}</div>
+      </div>
+      <div class="aiv-stat aiv-stat-teal">
+        <div class="aiv-stat-num">{home.aiv_stat2_num}</div>
+        <div class="aiv-stat-label">{home.aiv_stat2_lab}</div>
+      </div>
+      <div class="aiv-stat aiv-stat-green">
+        <div class="aiv-stat-num">{home.aiv_stat3_num}</div>
+        <div class="aiv-stat-label">{home.aiv_stat3_lab}</div>
+      </div>
+    </div>
+
+    <div class="aiv-body">
+      <div class="aiv-copy" set:html={home.aiv_body_html}></div>
+
+      <div class="aiv-deck" data-aiv-deck>
+        <div class="aiv-tabs" role="tablist" aria-label="AI visibility services">
+          <button class="aiv-tab is-active" type="button" role="tab" aria-selected="true" data-aiv-index="0" aria-label="AI Mode Visibility">
+            <svg viewBox="0 0 50 50" fill="currentColor" aria-hidden="true"><path d="M 25 12 C 11.667969 12 1.25 24.34375 1.25 24.34375 C 0.921875 24.71875 0.921875 25.28125 1.25 25.65625 C 1.25 25.65625 11.667969 38 25 38 C 38.332031 38 48.75 25.65625 48.75 25.65625 C 49.078125 25.28125 49.078125 24.71875 48.75 24.34375 C 48.75 24.34375 38.332031 12 25 12 Z M 25 14 C 27.628906 14 30.140625 14.542969 32.46875 15.375 C 34.03125 17.140625 35 19.449219 35 22 C 35 27.535156 30.535156 32 25 32 C 19.464844 32 15 27.535156 15 22 C 15 19.449219 15.9375 17.140625 17.5 15.375 C 19.835938 14.539063 22.363281 14 25 14 Z M 14.1875 16.84375 C 13.4375 18.40625 13 20.15625 13 22 C 13 28.617188 18.382813 34 25 34 C 31.617188 34 37 28.617188 37 22 C 37 20.164063 36.582031 18.40625 35.84375 16.84375 C 41.492188 19.714844 45.554688 23.878906 46.59375 25 C 44.96875 26.757813 35.972656 36 25 36 C 14.027344 36 5.03125 26.757813 3.40625 25 C 4.445313 23.875 8.527344 19.714844 14.1875 16.84375 Z M 25 17 C 22.238281 17 20 19.238281 20 22 C 20 24.761719 22.238281 27 25 27 C 27.761719 27 30 24.761719 30 22 C 30 19.238281 27.761719 17 25 17 Z"/></svg>
+          </button>
+          <button class="aiv-tab" type="button" role="tab" aria-selected="false" data-aiv-index="1" aria-label="AI Overviews Visibility">
+            <svg viewBox="0 0 50 50" fill="currentColor" aria-hidden="true"><path d="M 21 3 C 11.621094 3 4 10.621094 4 20 C 4 29.378906 11.621094 37 21 37 C 24.710938 37 28.140625 35.804688 30.9375 33.78125 L 44.09375 46.90625 L 46.90625 44.09375 L 33.90625 31.0625 C 36.460938 28.085938 38 24.222656 38 20 C 38 10.621094 30.378906 3 21 3 Z M 21 5 C 29.296875 5 36 11.703125 36 20 C 36 28.296875 29.296875 35 21 35 C 12.703125 35 6 28.296875 6 20 C 6 11.703125 12.703125 5 21 5 Z"/></svg>
+          </button>
+          <button class="aiv-tab" type="button" role="tab" aria-selected="false" data-aiv-index="2" aria-label="ChatGPT Search Optimization">
+            <svg viewBox="0 0 30 30" fill="currentColor" aria-hidden="true"><path d="M 14.070312 2 C 11.330615 2 8.9844456 3.7162572 8.0390625 6.1269531 C 6.061324 6.3911222 4.2941948 7.5446684 3.2773438 9.3066406 C 1.9078196 11.678948 2.2198602 14.567816 3.8339844 16.591797 C 3.0745422 18.436097 3.1891418 20.543674 4.2050781 22.304688 C 5.5751778 24.677992 8.2359331 25.852135 10.796875 25.464844 C 12.014412 27.045167 13.895916 28 15.929688 28 C 18.669385 28 21.015554 26.283743 21.960938 23.873047 C 23.938676 23.608878 25.705805 22.455332 26.722656 20.693359 C 28.09218 18.321052 27.78014 15.432184 26.166016 13.408203 C 26.925458 11.563903 26.810858 9.4563257 25.794922 7.6953125 C 24.424822 5.3220082 21.764067 4.1478652 19.203125 4.5351562 C 17.985588 2.9548328 16.104084 2 14.070312 2 z M 14.070312 4 C 15.226446 4 16.310639 4.4546405 17.130859 5.2265625 C 17.068225 5.2600447 17.003357 5.2865019 16.941406 5.3222656 L 12.501953 7.8867188 C 12.039953 8.1527187 11.753953 8.6456875 11.751953 9.1796875 L 11.724609 15.146484 L 9.5898438 13.900391 L 9.5898438 8.4804688 C 9.5898438 6.0104687 11.600312 4 14.070312 4 z M 20.492188 6.4667969 C 21.927441 6.5689063 23.290625 7.3584375 24.0625 8.6953125 C 24.640485 9.696213 24.789458 10.862812 24.53125 11.958984 C 24.470201 11.920997 24.414287 11.878008 24.351562 11.841797 L 19.910156 9.2773438 C 19.448156 9.0113437 18.879016 9.0103906 18.416016 9.2753906 L 13.236328 12.236328 L 13.248047 9.765625 L 17.941406 7.0546875 C 18.743531 6.5915625 19.631035 6.4055313 20.492188 6.4667969 z M 7.5996094 8.2675781 C 7.5972783 8.3387539 7.5898438 8.4087418 7.5898438 8.4804688 L 7.5898438 13.607422 C 7.5898438 14.141422 7.8729844 14.635297 8.3339844 14.904297 L 13.488281 17.910156 L 11.34375 19.134766 L 6.6484375 16.425781 C 4.5094375 15.190781 3.7747656 12.443687 5.0097656 10.304688 C 5.5874162 9.3043657 6.522013 8.5923015 7.5996094 8.2675781 z M 18.65625 10.865234 L 23.351562 13.574219 C 25.490562 14.809219 26.225234 17.556313 24.990234 19.695312 C 24.412584 20.695634 23.477987 21.407698 22.400391 21.732422 C 22.402722 21.661246 22.410156 21.591258 22.410156 21.519531 L 22.410156 16.392578 C 22.410156 15.858578 22.127016 15.364703 21.666016 15.095703 L 16.511719 12.089844 L 18.65625 10.865234 z M 15.009766 12.947266 L 16.78125 13.980469 L 16.771484 16.035156 L 14.990234 17.052734 L 13.21875 16.017578 L 13.228516 13.964844 L 15.009766 12.947266 z M 18.275391 14.853516 L 20.410156 16.099609 L 20.410156 21.519531 C 20.410156 23.989531 18.399687 26 15.929688 26 C 14.773554 26 13.689361 25.54536 12.869141 24.773438 C 12.931775 24.739955 12.996643 24.713498 13.058594 24.677734 L 17.498047 22.113281 C 17.960047 21.847281 18.246047 21.354312 18.248047 20.820312 L 18.275391 14.853516 z M 16.763672 17.763672 L 16.751953 20.234375 L 12.058594 22.945312 C 9.9195938 24.180312 7.1725 23.443687 5.9375 21.304688 C 5.3595152 20.303787 5.2105423 19.137188 5.46875 18.041016 C 5.5297994 18.079003 5.5857129 18.121992 5.6484375 18.158203 L 10.089844 20.722656 C 10.551844 20.988656 11.120984 20.989609 11.583984 20.724609 L 16.763672 17.763672 z"/></svg>
+          </button>
+          <button class="aiv-tab" type="button" role="tab" aria-selected="false" data-aiv-index="3" aria-label="Gemini Search Optimization">
+            <svg viewBox="0 0 50 50" fill="currentColor" aria-hidden="true"><path d="M22,14.411l1.645,3.007c0.736,1.345,1.835,2.445,3.18,3.18l3.007,1.645l-3.007,1.645c-1.345,0.735-2.445,1.835-3.18,3.18 L22,30.075l-1.645-3.007c-0.736-1.345-1.835-2.445-3.18-3.18l-3.007-1.645l3.007-1.645c1.345-0.735,2.445-1.835,3.18-3.18 L22,14.411 M22,11.327c-0.344,0-0.688,0.173-0.877,0.52l-2.522,4.611c-0.551,1.007-1.378,1.834-2.385,2.385l-4.611,2.522 c-0.694,0.379-0.694,1.375,0,1.755l4.611,2.522c1.007,0.551,1.834,1.378,2.385,2.385l2.522,4.611c0.19,0.347,0.534,0.52,0.877,0.52 s0.688-0.173,0.877-0.52l2.522-4.611c0.551-1.007,1.378-1.835,2.385-2.385l4.611-2.522c0.694-0.379,0.694-1.375,0-1.755 l-4.611-2.522c-1.007-0.551-1.834-1.378-2.385-2.385l-2.522-4.611C22.688,11.501,22.344,11.327,22,11.327L22,11.327z"/><path d="M34.235,39.783c-0.001,0-0.002,0-0.003,0c-0.44-0.001-0.844-0.242-1.053-0.631l-1.225-2.238 c-0.093-0.169-0.23-0.307-0.397-0.397l-2.245-1.229c-0.387-0.212-0.626-0.616-0.625-1.056c0.002-0.439,0.242-0.842,0.628-1.051 l2.241-1.227c0.169-0.093,0.306-0.229,0.397-0.397l1.229-2.246c0.207-0.382,0.609-0.622,1.049-0.624c0.001,0,0.002,0,0.003,0 c0.438,0,0.841,0.239,1.053,0.623v0.002l1.228,2.245c0.092,0.167,0.229,0.305,0.398,0.397l2.245,1.229 c0.382,0.205,0.623,0.608,0.624,1.049s-0.238,0.846-0.626,1.057l-2.244,1.227c-0.167,0.093-0.305,0.23-0.397,0.398l-1.228,2.244 C35.078,39.544,34.675,39.783,34.235,39.783z M31.556,34.235l0.961,0.526c0.504,0.274,0.916,0.687,1.192,1.191l0.526,0.962l0.526-0.961c0.276-0.505,0.688-0.916,1.191-1.192 l0.962-0.526l-0.962-0.526c-0.505-0.276-0.917-0.688-1.192-1.192l-0.525-0.961l-0.526,0.962c-0.275,0.504-0.688,0.916-1.192,1.192 L31.556,34.235z"/></svg>
+          </button>
+        </div>
+
+        <div class="aiv-stack" data-aiv-stack>
+          <article class="aiv-card aiv-card-1 is-front" data-aiv-card="0">
+            <div class="aiv-card-inner">
+              <div class="aiv-card-head">
+                <span class="aiv-card-icon">
+                  <svg viewBox="0 0 50 50" fill="currentColor" aria-hidden="true"><path d="M 25 12 C 11.667969 12 1.25 24.34375 1.25 24.34375 C 0.921875 24.71875 0.921875 25.28125 1.25 25.65625 C 1.25 25.65625 11.667969 38 25 38 C 38.332031 38 48.75 25.65625 48.75 25.65625 C 49.078125 25.28125 49.078125 24.71875 48.75 24.34375 C 48.75 24.34375 38.332031 12 25 12 Z M 25 14 C 27.628906 14 30.140625 14.542969 32.46875 15.375 C 34.03125 17.140625 35 19.449219 35 22 C 35 27.535156 30.535156 32 25 32 C 19.464844 32 15 27.535156 15 22 C 15 19.449219 15.9375 17.140625 17.5 15.375 C 19.835938 14.539063 22.363281 14 25 14 Z M 14.1875 16.84375 C 13.4375 18.40625 13 20.15625 13 22 C 13 28.617188 18.382813 34 25 34 C 31.617188 34 37 28.617188 37 22 C 37 20.164063 36.582031 18.40625 35.84375 16.84375 C 41.492188 19.714844 45.554688 23.878906 46.59375 25 C 44.96875 26.757813 35.972656 36 25 36 C 14.027344 36 5.03125 26.757813 3.40625 25 C 4.445313 23.875 8.527344 19.714844 14.1875 16.84375 Z M 25 17 C 22.238281 17 20 19.238281 20 22 C 20 24.761719 22.238281 27 25 27 C 27.761719 27 30 24.761719 30 22 C 30 19.238281 27.761719 17 25 17 Z"/></svg>
+                </span>
+                <a class="aiv-card-title" href={aivCards[0]?.url} target="_blank" rel="noopener">{aivCards[0]?.title}</a>
+              </div>
+              <p>{aivCards[0]?.body}</p>
+            </div>
+          </article>
+
+          <article class="aiv-card aiv-card-2" data-aiv-card="1">
+            <div class="aiv-card-inner">
+              <div class="aiv-card-head">
+                <span class="aiv-card-icon">
+                  <svg viewBox="0 0 50 50" fill="currentColor" aria-hidden="true"><path d="M 21 3 C 11.621094 3 4 10.621094 4 20 C 4 29.378906 11.621094 37 21 37 C 24.710938 37 28.140625 35.804688 30.9375 33.78125 L 44.09375 46.90625 L 46.90625 44.09375 L 33.90625 31.0625 C 36.460938 28.085938 38 24.222656 38 20 C 38 10.621094 30.378906 3 21 3 Z M 21 5 C 29.296875 5 36 11.703125 36 20 C 36 28.296875 29.296875 35 21 35 C 12.703125 35 6 28.296875 6 20 C 6 11.703125 12.703125 5 21 5 Z"/></svg>
+                </span>
+                <a class="aiv-card-title" href={aivCards[1]?.url} target="_blank" rel="noopener">{aivCards[1]?.title}</a>
+              </div>
+              <p>{aivCards[1]?.body}</p>
+            </div>
+          </article>
+
+          <article class="aiv-card aiv-card-3" data-aiv-card="2">
+            <div class="aiv-card-inner">
+              <div class="aiv-card-head">
+                <span class="aiv-card-icon">
+                  <svg viewBox="0 0 30 30" fill="currentColor" aria-hidden="true"><path d="M 14.070312 2 C 11.330615 2 8.9844456 3.7162572 8.0390625 6.1269531 C 6.061324 6.3911222 4.2941948 7.5446684 3.2773438 9.3066406 C 1.9078196 11.678948 2.2198602 14.567816 3.8339844 16.591797 C 3.0745422 18.436097 3.1891418 20.543674 4.2050781 22.304688 C 5.5751778 24.677992 8.2359331 25.852135 10.796875 25.464844 C 12.014412 27.045167 13.895916 28 15.929688 28 C 18.669385 28 21.015554 26.283743 21.960938 23.873047 C 23.938676 23.608878 25.705805 22.455332 26.722656 20.693359 C 28.09218 18.321052 27.78014 15.432184 26.166016 13.408203 C 26.925458 11.563903 26.810858 9.4563257 25.794922 7.6953125 C 24.424822 5.3220082 21.764067 4.1478652 19.203125 4.5351562 C 17.985588 2.9548328 16.104084 2 14.070312 2 z M 14.070312 4 C 15.226446 4 16.310639 4.4546405 17.130859 5.2265625 C 17.068225 5.2600447 17.003357 5.2865019 16.941406 5.3222656 L 12.501953 7.8867188 C 12.039953 8.1527187 11.753953 8.6456875 11.751953 9.1796875 L 11.724609 15.146484 L 9.5898438 13.900391 L 9.5898438 8.4804688 C 9.5898438 6.0104687 11.600312 4 14.070312 4 z M 20.492188 6.4667969 C 21.927441 6.5689063 23.290625 7.3584375 24.0625 8.6953125 C 24.640485 9.696213 24.789458 10.862812 24.53125 11.958984 C 24.470201 11.920997 24.414287 11.878008 24.351562 11.841797 L 19.910156 9.2773438 C 19.448156 9.0113437 18.879016 9.0103906 18.416016 9.2753906 L 13.236328 12.236328 L 13.248047 9.765625 L 17.941406 7.0546875 C 18.743531 6.5915625 19.631035 6.4055313 20.492188 6.4667969 z M 7.5996094 8.2675781 C 7.5972783 8.3387539 7.5898438 8.4087418 7.5898438 8.4804688 L 7.5898438 13.607422 C 7.5898438 14.141422 7.8729844 14.635297 8.3339844 14.904297 L 13.488281 17.910156 L 11.34375 19.134766 L 6.6484375 16.425781 C 4.5094375 15.190781 3.7747656 12.443687 5.0097656 10.304688 C 5.5874162 9.3043657 6.522013 8.5923015 7.5996094 8.2675781 z M 18.65625 10.865234 L 23.351562 13.574219 C 25.490562 14.809219 26.225234 17.556313 24.990234 19.695312 C 24.412584 20.695634 23.477987 21.407698 22.400391 21.732422 C 22.402722 21.661246 22.410156 21.591258 22.410156 21.519531 L 22.410156 16.392578 C 22.410156 15.858578 22.127016 15.364703 21.666016 15.095703 L 16.511719 12.089844 L 18.65625 10.865234 z M 15.009766 12.947266 L 16.78125 13.980469 L 16.771484 16.035156 L 14.990234 17.052734 L 13.21875 16.017578 L 13.228516 13.964844 L 15.009766 12.947266 z M 18.275391 14.853516 L 20.410156 16.099609 L 20.410156 21.519531 C 20.410156 23.989531 18.399687 26 15.929688 26 C 14.773554 26 13.689361 25.54536 12.869141 24.773438 C 12.931775 24.739955 12.996643 24.713498 13.058594 24.677734 L 17.498047 22.113281 C 17.960047 21.847281 18.246047 21.354312 18.248047 20.820312 L 18.275391 14.853516 z M 16.763672 17.763672 L 16.751953 20.234375 L 12.058594 22.945312 C 9.9195938 24.180312 7.1725 23.443687 5.9375 21.304688 C 5.3595152 20.303787 5.2105423 19.137188 5.46875 18.041016 C 5.5297994 18.079003 5.5857129 18.121992 5.6484375 18.158203 L 10.089844 20.722656 C 10.551844 20.988656 11.120984 20.989609 11.583984 20.724609 L 16.763672 17.763672 z"/></svg>
+                </span>
+                <a class="aiv-card-title" href={aivCards[2]?.url} target="_blank" rel="noopener">{aivCards[2]?.title}</a>
+              </div>
+              <p>{aivCards[2]?.body}</p>
+            </div>
+          </article>
+
+          <article class="aiv-card aiv-card-4" data-aiv-card="3">
+            <div class="aiv-card-inner">
+              <div class="aiv-card-head">
+                <span class="aiv-card-icon">
+                  <svg viewBox="0 0 50 50" fill="currentColor" aria-hidden="true"><path d="M22,14.411l1.645,3.007c0.736,1.345,1.835,2.445,3.18,3.18l3.007,1.645l-3.007,1.645c-1.345,0.735-2.445,1.835-3.18,3.18 L22,30.075l-1.645-3.007c-0.736-1.345-1.835-2.445-3.18-3.18l-3.007-1.645l3.007-1.645c1.345-0.735,2.445-1.835,3.18-3.18 L22,14.411 M22,11.327c-0.344,0-0.688,0.173-0.877,0.52l-2.522,4.611c-0.551,1.007-1.378,1.834-2.385,2.385l-4.611,2.522 c-0.694,0.379-0.694,1.375,0,1.755l4.611,2.522c1.007,0.551,1.834,1.378,2.385,2.385l2.522,4.611c0.19,0.347,0.534,0.52,0.877,0.52 s0.688-0.173,0.877-0.52l2.522-4.611c0.551-1.007,1.378-1.835,2.385-2.385l4.611-2.522c0.694-0.379,0.694-1.375,0-1.755 l-4.611-2.522c-1.007-0.551-1.834-1.378-2.385-2.385l-2.522-4.611C22.688,11.501,22.344,11.327,22,11.327L22,11.327z"/><path d="M34.235,39.783c-0.001,0-0.002,0-0.003,0c-0.44-0.001-0.844-0.242-1.053-0.631l-1.225-2.238 c-0.093-0.169-0.23-0.307-0.397-0.397l-2.245-1.229c-0.387-0.212-0.626-0.616-0.625-1.056c0.002-0.439,0.242-0.842,0.628-1.051 l2.241-1.227c0.169-0.093,0.306-0.229,0.397-0.397l1.229-2.246c0.207-0.382,0.609-0.622,1.049-0.624c0.001,0,0.002,0,0.003,0 c0.438,0,0.841,0.239,1.053,0.623v0.002l1.228,2.245c0.092,0.167,0.229,0.305,0.398,0.397l2.245,1.229 c0.382,0.205,0.623,0.608,0.624,1.049s-0.238,0.846-0.626,1.057l-2.244,1.227c-0.167,0.093-0.305,0.23-0.397,0.398l-1.228,2.244 C35.078,39.544,34.675,39.783,34.235,39.783z M31.556,34.235l0.961,0.526c0.504,0.274,0.916,0.687,1.192,1.191l0.526,0.962l0.526-0.961c0.276-0.505,0.688-0.916,1.191-1.192 l0.962-0.526l-0.962-0.526c-0.505-0.276-0.917-0.688-1.192-1.192l-0.525-0.961l-0.526,0.962c-0.275,0.504-0.688,0.916-1.192,1.192 L31.556,34.235z"/></svg>
+                </span>
+                <a class="aiv-card-title" href={aivCards[3]?.url} target="_blank" rel="noopener">{aivCards[3]?.title}</a>
+              </div>
+              <p>{aivCards[3]?.body}</p>
+            </div>
+          </article>
+
+          <div class="aiv-nav">
+            <button class="aiv-arrow" type="button" data-aiv-prev aria-label="Previous service">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="18 15 12 9 6 15"/></svg>
+            </button>
+            <button class="aiv-arrow" type="button" data-aiv-next aria-label="Next service">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="aiv-cta">
+      <a class="btn btn-primary" href={home.aiv_cta_url}>{home.aiv_cta_text}</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============== 06.7 How We Grow Your Revenue ============== -->
+<section class="grow-revenue" id="grow-revenue">
+  <div class="wrap">
+    <div class="gr-intro">
+      <div class="gr-intro-copy">
+        <h2 class="section-h2 section-h2-left">{home.grow_h2}</h2>
+        <Fragment set:html={home.grow_body_html} />
+      </div>
+      <div class="gr-intro-cluster">
+        <a class="gr-logo-link" href="#grow-score" aria-label="Jump to Thrive Score">
+          <img src="/assets/tools/thrive-score-logo.png" alt="Thrive Score" loading="lazy" />
+        </a>
+        <a class="gr-logo-link" href="#grow-stats" aria-label="Jump to Thrive Stats">
+          <img src="/assets/tools/thrive-stats-logo.png" alt="Thrive Stats" loading="lazy" />
+        </a>
+        <a class="gr-logo-link" href="#grow-ai" aria-label="Jump to ThriveAI">
+          <img src="/assets/tools/thrive-ai-logo.png" alt="ThriveAI" loading="lazy" />
+        </a>
+        <a class="gr-logo-link" href="#grow-growth" aria-label="Jump to Thrive Growth Formula">
+          <img src="/assets/tools/thrive-growth-formula-logo.png" alt="Thrive Growth Formula" loading="lazy" />
+        </a>
+        <a class="gr-logo-link" href="#grow-local" aria-label="Jump to Thrive Local">
+          <img src="/assets/tools/thrive-local-logo.png" alt="Thrive Local" loading="lazy" />
+        </a>
+      </div>
+    </div>
+
+    <div class="gr-cards">
+      {toolsRendered.map((t, i) => (
+        <article class:list={['gr-card', toolClasses[i % toolClasses.length]]} id={toolIds[i % toolIds.length]}>
+          <div class="gr-card-copy">
+            <img class="gr-card-logo" src={t.logo} alt="" loading="lazy" />
+            {t.heading ? <h3 class="gr-card-h3">{t.heading}</h3> : null}
+            <Fragment set:html={t.body_html} />
+            <a class="gr-learn" href={t.learn_url} target="_blank" rel="noopener">LEARN MORE <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="10 8 14 12 10 16"/></svg></a>
+          </div>
+          <div class:list={['gr-card-visual', toolVisualClasses[i % toolVisualClasses.length]]}>
+            <img src={t.visual} alt="" loading="lazy" />
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- ============== 06.8 Top Rankings phone mockups ============== -->
+<section class="rankings">
+  <div class="wrap">
+    <h2 class="section-h2">{home.rankings_h2}</h2>
+    <p class="section-sub">{home.rankings_sub}</p>
+    <div class="rk-grid">
+      <div class="rk-col">
+        <div class="rk-pill rk-pill-green">{home.rk_pill1}</div>
+        <img class="rk-phone" src="/assets/rankings/phone-google-search.png" alt="Phone showing Thrive ranked first in Google for 'Digital Marketing Agency'" loading="lazy" />
+      </div>
+      <div class="rk-col">
+        <div class="rk-pill rk-pill-blue">{home.rk_pill2}</div>
+        <img class="rk-phone" src="/assets/rankings/phone-google-maps.png" alt="Phone showing Thrive ranked first in Google Maps for 'SEO Company'" loading="lazy" />
+      </div>
+      <div class="rk-col">
+        <div class="rk-pill rk-pill-teal">{home.rk_pill3}</div>
+        <img class="rk-phone" src="/assets/rankings/phone-chatgpt.png" alt="Phone showing Thrive listed first in ChatGPT for 'Top Digital Marketing Agency'" loading="lazy" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== 07 Why Choose Thrive (merged: intro + video + accordion) ============== -->
+<section class="why-thrive" id="why-us">
+  <div class="wrap">
+    <div class="why-grid">
+      <div class="why-copy">
+        <span class="section-eyebrow">{home.why_eyebrow}</span>
+        <h2 class="section-h2 section-h2-left">{home.why_h2}</h2>
+        <Fragment set:html={home.why_body_html} />
+      </div>
+      <div class="why-video">
+        <a class="video-thumb" href="https://www.youtube.com/watch?v=RS_skL0T71U" target="_blank" rel="noopener" aria-label="Watch: meet the Thrive team on YouTube">
+          <img src="https://img.youtube.com/vi/RS_skL0T71U/maxresdefault.jpg" onerror="this.onerror=null;this.src='https://img.youtube.com/vi/RS_skL0T71U/hqdefault.jpg';" alt="Meet the Thrive team video thumbnail" loading="lazy" />
+          <span class="play-btn" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+          </span>
+        </a>
+      </div>
+    </div>
+
+    <div class="why-team" id="team">
+      <h3 class="why-team-h3">{home.why_team_h3}</h3>
+      <div class="why-values">
+        {values.map((v, i) => (
+          <article class="why-val-item">
+            <span class="why-val-ico" aria-hidden="true" set:html={valueIcons[i % valueIcons.length]}></span>
+            <div class="why-val-body">
+              <h4 class="why-val-title">{v.title}</h4>
+              <p>{v.body}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div class="rv-cta why-cta">
+        <a class="btn btn-primary" href={home.why_cta_url}>{home.why_cta_text}</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== 09 Closing CTA + awards strip ============== -->
+<section class="closing-cta">
+  <div class="wrap">
+    <div class="rg-card">
+      <div class="rg-card-bg" aria-hidden="true">
+        <svg viewBox="0 0 1200 360" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M 720,-20 Q 920,60 870,200 T 1240,260 L 1240,-40 L 720,-40 Z" fill="rgba(255,255,255,.10)"/>
+          <path d="M 800,360 Q 1000,300 980,180 T 1240,40 L 1240,380 L 800,380 Z" fill="rgba(60,98,42,.18)"/>
+          <path d="M -40,160 Q 240,40 360,180 T 660,300 L 660,400 L -40,400 Z" fill="rgba(255,255,255,.07)"/>
+          <circle cx="1080" cy="60" r="160" fill="rgba(255,255,255,.06)"/>
+          <circle cx="140" cy="260" r="120" fill="rgba(255,255,255,.05)"/>
+        </svg>
+      </div>
+      <div class="rg-card-copy">
+        <h2 class="rg-h2">{home.closing_h2}</h2>
+        <p>{home.closing_text}</p>
+        <div class="rg-actions">
+          <a class="btn btn-primary btn-lg" href="#contactForm">{home.closing_cta1_text}</a>
+          <span class="rg-or">OR</span>
+          <a class="btn btn-ghost-light btn-lg" href="tel:8883420534">{home.closing_cta2_text}</a>
+        </div>
+      </div>
+      <div class="rg-card-photo">
+        <img src="/assets/closing/phumlani-ngcana-new.png" alt="Phumlani Ngcana, Senior Marketing Consultant at Thrive" loading="lazy" />
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<SiteFooter />
+
+<!-- ============== Page-scoped styles ============== -->
+<style is:inline>
+  /* Section base */
+  .section-h2 {
+    font-size: clamp(28px, 3.4vw, 44px);
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    margin: 0 0 14px;
+    text-align: center;
+  }
+  .section-sub {
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    margin: 0 auto 40px;
+    text-align: center;
+    max-width: 720px;
+  }
+  .section-eyebrow {
+    display: inline-block;
+    font-size: 11px; font-weight: 800; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--thrive-green-dark);
+    background: rgba(125,150,61,.10); padding: 6px 12px; border-radius: 99px;
+    margin-bottom: 14px;
+  }
+
+  /* ============== 02 Hero ============== */
+  .hero-home { background: linear-gradient(180deg, var(--pastel-mint) 0%, #f6f9ec 100%); }
+  .hero-home h1 em {
+    color: var(--thrive-green-dark);
+    font-family: inherit;
+    font-style: normal;
+    font-weight: inherit;
+  }
+  .urg-pill-green {
+    background: var(--thrive-green-dark);
+    color: #fff;
+    border-color: var(--thrive-green-dark);
+  }
+  .urg-pill-green .dot {
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(255,255,255,.35);
+  }
+  .hero-home .trust-list .check {
+    background: var(--thrive-green);
+  }
+  .hero-team {
+    display: flex; align-items: center; gap: 14px;
+    margin-top: 18px;
+  }
+  .hero-team-photos {
+    display: flex;
+  }
+  .hero-team-photos img {
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 2px solid #fff; object-fit: cover; object-position: center 18%;
+    margin-left: -10px; box-shadow: 0 4px 12px rgba(68,63,52,.18);
+  }
+  .hero-team-photos img:first-child { margin-left: 0; }
+  .hero-team-label {
+    font-size: 13px; color: var(--ink-soft); line-height: 1.4;
+    margin: 0; max-width: 220px;
+  }
+
+  /* Lead form card (green border treatment) */
+  .hero-home .lead-form-card {
+    background: #fff;
+    border: 2px solid var(--thrive-green);
+    border-radius: 20px;
+    padding: 24px;
+    width: 100%;
+    box-shadow: 0 0 0 6px rgba(125,150,61,.10), 0 20px 50px -18px rgba(125,150,61,.35);
+  }
+  .hero-home .lf-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 800; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--thrive-green-dark);
+    background: rgba(125,150,61,.10); padding: 6px 10px; border-radius: 99px;
+    margin-bottom: 14px;
+  }
+  .hero-home .lf-eyebrow .pulse {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--thrive-green);
+    box-shadow: 0 0 0 0 rgba(125,150,61,.6); animation: lfPulseG 1.6s infinite;
+  }
+  @keyframes lfPulseG { 0%,100% { box-shadow: 0 0 0 0 rgba(125,150,61,.6); } 70% { box-shadow: 0 0 0 8px rgba(125,150,61,0); } }
+  .lf-headline { font-size: 24px; line-height: 1.18; letter-spacing: -0.02em; margin: 0 0 8px; color: var(--ink); }
+  .lf-sub { font-size: 14px; line-height: 1.45; color: var(--ink-soft); margin: 0 0 18px; }
+
+  .contact-form { display: flex; flex-direction: column; gap: 12px; }
+  /* align-items:end bottom-aligns the inputs so a label that wraps to two
+     lines (e.g. COMPANY / ORGANIZATION) doesn't push its input out of line
+     with the single-line label beside it. */
+  .contact-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: end; }
+  /* min-width:0 lets the grid tracks shrink below the inputs' intrinsic
+     width — without it the two-column row blows past a phone viewport and
+     the right column gets clipped by the page's overflow-x: clip. */
+  .contact-form .field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .contact-form .field-label { font-size: 11px; font-weight: 700; color: var(--ink-soft); letter-spacing: 0.04em; text-transform: uppercase; }
+  .contact-form .field-label .req { color: var(--thrive-orange); }
+  .contact-form input,
+  .contact-form select {
+    padding: 11px 12px;
+    border: 1.5px solid rgba(68,63,52,.18);
+    border-radius: 8px;
+    /* 16px prevents iOS Safari auto-zoom-on-focus. */
+    font-size: 16px;
+    font-family: inherit;
+    background: #fff;
+    color: var(--ink);
+    transition: border-color 120ms, box-shadow 120ms;
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  @media (min-width: 740px) {
+    .contact-form input,
+    .contact-form select { font-size: 14px; }
+  }
+  .contact-form input:focus,
+  .contact-form select:focus {
+    outline: none;
+    border-color: var(--thrive-green);
+    box-shadow: 0 0 0 3px rgba(125,150,61,.18);
+  }
+  .contact-form .field.is-error input,
+  .contact-form .field.is-error select { border-color: #c0392b; }
+  .contact-form .form-actions { margin-top: 8px; }
+  .contact-form .btn-block { width: 100%; padding: 14px 18px; font-size: 14px; }
+  .contact-form .form-fineprint { font-size: 11px; color: var(--muted); text-align: center; margin: 8px 0 0; }
+
+  .lf-success { text-align: center; padding: 28px 16px; }
+  .lf-success-check {
+    width: 56px; height: 56px; border-radius: 50%; background: var(--thrive-green-deep); color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 32px; font-weight: 700; margin-bottom: 14px;
+  }
+  .lf-success h3 { font-size: 22px; margin: 0 0 10px; color: var(--ink); }
+  .lf-success p { color: var(--ink-soft); font-size: 14px; line-height: 1.5; margin: 0; }
+
+  /* ============== 03 Trust strip ============== */
+  .trust-strip { padding: 40px 0 30px; background: #f6f9ec; border-top: 1px solid var(--line); }
+  .ts-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 36px;
+    flex-wrap: wrap;
+    max-width: 1180px;
+    margin: 0 auto 28px;
+  }
+  .ts-bar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .ts-bar-logo {
+    height: 30px; width: auto; display: block;
+  }
+  .ts-bar-meta {
+    display: flex; align-items: center; gap: 8px;
+    line-height: 1;
+  }
+  .ts-bar-meta-stack {
+    flex-direction: column; align-items: flex-start; gap: 4px;
+  }
+  /* Faces image + review link sit side by side on desktop but overflow a
+     phone; flex-wrap drops the link below the faces when space runs out. */
+  .ts-bar-item-reviews { flex-wrap: wrap; justify-content: center; }
+  .ts-bar-num {
+    font-size: 22px; font-weight: 800; color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .ts-bar-stars {
+    color: #f5b021;
+    font-size: 14px;
+    letter-spacing: 1px;
+    line-height: 1;
+  }
+  .ts-bar-stars-lg { font-size: 18px; }
+  .ts-bar-lab {
+    font-size: 13px; font-weight: 700;
+    color: var(--ink-soft);
+    background: #f0f0ee;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+  .ts-bar-faces {
+    height: 38px; width: auto;
+    display: block;
+  }
+  .ts-bar-link {
+    display: inline-flex; align-items: center; gap: 4px;
+    color: var(--ink); font-weight: 700;
+    font-size: 14.5px; letter-spacing: -0.005em;
+    text-decoration: none;
+    transition: color 140ms ease;
+  }
+  .ts-bar-link svg { color: var(--thrive-green-dark); }
+  .ts-bar-link:hover { color: var(--thrive-green-dark); }
+  .ts-logo-marquee {
+    position: relative;
+    max-width: 1180px; margin: 0 auto;
+    overflow: hidden;
+    padding: 6px 0;
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 80px, #000 calc(100% - 80px), transparent 100%);
+            mask-image: linear-gradient(90deg, transparent 0, #000 80px, #000 calc(100% - 80px), transparent 100%);
+  }
+  .ts-marquee-track {
+    display: flex; width: max-content;
+    animation: ts-marquee-scroll 38s linear infinite;
+    will-change: transform;
+  }
+  .ts-marquee-track:hover { animation-play-state: paused; }
+  .ts-marquee-row {
+    list-style: none; margin: 0; padding: 0;
+    display: flex; align-items: center; gap: 64px;
+    padding-right: 64px;
+    flex-shrink: 0;
+  }
+  .ts-marquee-row li {
+    display: flex; align-items: center; justify-content: center;
+    height: 64px; min-width: 120px;
+  }
+  .ts-marquee-row img {
+    max-height: 56px; width: auto; max-width: 180px;
+    object-fit: contain;
+    opacity: .78;
+    filter: grayscale(.55) contrast(.98);
+    transition: opacity 280ms ease, filter 280ms ease, transform 280ms ease;
+  }
+  .ts-marquee-row li:hover img {
+    opacity: 1; filter: grayscale(0) contrast(1);
+    transform: translateY(-2px);
+  }
+  @keyframes ts-marquee-scroll {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(-50%, 0, 0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ts-marquee-track { animation: none; }
+  }
+
+  /* ============== 04 Client result videos ============== */
+  .results-videos { padding: 88px 0; background: #ffffff; }
+  .rv-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 32px;
+    max-width: 1120px; margin: 0 auto;
+  }
+  .rv-card {
+    position: relative;
+    background: #fff; border: 1px solid var(--line);
+    border-radius: 22px; overflow: hidden;
+    box-shadow: 0 24px 60px -32px rgba(68,63,52,.30);
+    display: flex; flex-direction: column;
+    transition: transform 220ms ease, box-shadow 220ms ease;
+  }
+  .rv-card:hover { transform: translateY(-4px); box-shadow: 0 32px 70px -30px rgba(68,63,52,.40); }
+  .rv-thumb {
+    position: relative; display: block;
+    aspect-ratio: 16 / 9; overflow: hidden;
+    background: #2f3e0f;
+  }
+  .rv-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* Boost the TruckAC+ frame, which reads washed-out at source */
+  .rv-thumb-boost img { filter: saturate(1.22) contrast(1.1) brightness(1.02); }
+  .rv-thumb::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 0%, transparent 50%, rgba(0,0,0,.55) 100%);
+    pointer-events: none;
+  }
+  .rv-tag {
+    position: absolute; left: 18px; bottom: 14px; z-index: 2;
+    color: #fff; font-size: 18px; font-weight: 800; letter-spacing: -0.01em;
+    text-shadow: 0 2px 12px rgba(0,0,0,.5);
+  }
+  .rv-body { padding: 26px 28px 28px; }
+  .rv-quote { font-size: 19px; line-height: 1.45; color: var(--ink); margin: 0 0 6px; letter-spacing: -0.005em; }
+  .rv-quote em {
+    font-style: italic;
+    font-weight: 500;
+  }
+  .rv-attrib {
+    font-size: 13px; color: var(--ink-soft);
+    text-align: right; margin: 0 0 22px;
+    font-weight: 600; letter-spacing: 0.02em;
+  }
+
+  /* Seal-of-result stats — numbers carry the proof */
+  .rv-stats-wrap { position: relative; margin: 0 0 22px; }
+  .rv-stats-seal {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 10px; font-weight: 800;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--thrive-green-dark);
+    padding: 6px 12px; border-radius: 99px;
+    background: rgba(125,150,61,.10);
+    border: 1px solid rgba(125,150,61,.22);
+    margin-bottom: 14px;
+  }
+  .rv-stats {
+    list-style: none; padding: 20px 8px; margin: 0;
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    background: linear-gradient(180deg, #fafcf2, #f4f8e8);
+    border: 1px solid rgba(125,150,61,.20);
+    border-radius: 16px;
+    gap: 0;
+  }
+  .rv-stats li {
+    text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 4px 10px;
+    border-right: 1px solid rgba(125,150,61,.18);
+  }
+  .rv-stats li:last-child { border-right: none; }
+  .rv-stat-num {
+    display: block;
+    font-weight: 800;
+    font-size: clamp(26px, 3vw, 34px);
+    line-height: 1;
+    letter-spacing: -0.035em;
+    color: var(--thrive-green-dark);
+    font-variant-numeric: tabular-nums;
+  }
+  .rv-stat-lab {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    line-height: 1.3;
+  }
+  .rv-stat-sub {
+    display: block;
+    font-size: 9.5px; font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: none;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .rv-link {
+    font-size: 14px; font-weight: 700; color: var(--thrive-green-dark);
+    text-decoration: none; display: inline-block;
+    transition: color 120ms ease;
+  }
+  .rv-link:hover { color: var(--thrive-orange-dark); }
+  .rv-cta { text-align: center; margin-top: 44px; }
+  @media (max-width: 640px) {
+    .rv-stats { padding: 16px 4px; }
+    .rv-stats li { padding: 2px 6px; }
+    .rv-stat-num { font-size: 26px; }
+    .rv-stat-lab { font-size: 9.5px; letter-spacing: 0.04em; }
+  }
+
+  /* ============== 05 More Client Wins ============== */
+  .wins-strip { padding: 60px 0; background: #fff; }
+  .wins-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+    max-width: 1180px; margin: 0 auto;
+  }
+  .win-card {
+    position: relative;
+    background: #fff; border: 1px solid var(--line);
+    border-radius: 18px; padding: 26px 26px 24px;
+    display: flex; flex-direction: column; gap: 18px;
+    overflow: hidden;
+    transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+  }
+  .win-card::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--thrive-green), var(--thrive-green-dark));
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 320ms ease;
+  }
+  .win-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 26px 50px -28px rgba(125,150,61,.35);
+    border-color: rgba(125,150,61,.30);
+  }
+  .win-card:hover::before { transform: scaleX(1); }
+  .win-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 14px; margin: 0;
+  }
+  .win-pill {
+    display: inline-flex; align-items: center;
+    font-size: 10px; font-weight: 800;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--thrive-green-dark);
+    background: rgba(125,150,61,.10);
+    border: 1px solid rgba(125,150,61,.22);
+    padding: 5px 10px; border-radius: 99px;
+    line-height: 1.2;
+  }
+  .win-logo {
+    height: 36px; display: flex; align-items: center; justify-content: flex-end;
+    flex-shrink: 0;
+  }
+  .win-logo img { max-height: 36px; max-width: 130px; width: auto; object-fit: contain; }
+  .win-logo.win-logo-tall { height: 56px; }
+  .win-logo.win-logo-tall img { max-height: 56px; max-width: 70px; }
+  .win-hero {
+    display: flex; flex-direction: column; gap: 4px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid rgba(68,63,52,.08);
+  }
+  .win-hero-num {
+    font-weight: 800;
+    font-size: clamp(34px, 3.6vw, 46px);
+    line-height: 1;
+    letter-spacing: -0.035em;
+    color: var(--thrive-green-dark);
+    font-variant-numeric: tabular-nums;
+  }
+  .win-hero-lab {
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .win-stats { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+  .win-stats li { font-size: 14px; color: var(--ink-soft); line-height: 1.4; }
+  .win-stats strong {
+    color: var(--thrive-green-dark);
+    font-weight: 800; font-size: 15px;
+    margin-right: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  .win-foot {
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px solid rgba(68,63,52,.08);
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .win-services {
+    font-size: 12px; color: var(--muted);
+    letter-spacing: 0.02em; margin: 0;
+    line-height: 1.5;
+  }
+  .win-link {
+    font-size: 13px; font-weight: 700;
+    color: var(--thrive-green-dark);
+    text-decoration: none;
+    transition: color 120ms ease;
+  }
+  .win-link:hover { color: var(--thrive-orange-dark); }
+
+  /* ============== 06 Inc 5000 ============== */
+  .inc5000-callout { padding: 56px 0; background: #fff; }
+  .inc-headline {
+    text-align: center;
+    font-size: clamp(26px, 3vw, 38px); line-height: 1.18;
+    letter-spacing: -0.022em; color: var(--ink);
+    margin: 0 auto 36px; max-width: 1000px;
+  }
+  .inc-card {
+    position: relative;
+    max-width: 1120px; margin: 0 auto;
+    background: #f5f5f3;
+    border-radius: 28px;
+    padding: 64px 72px 64px 360px;
+    display: grid; grid-template-columns: 1fr; gap: 0;
+  }
+  .inc-card-badge {
+    position: absolute; left: 48px; top: 50%;
+    transform: translateY(-50%) rotate(-7deg);
+    filter: drop-shadow(0 18px 30px rgba(68,63,52,.22));
+    width: 260px;
+    pointer-events: none;
+  }
+  .inc-card-badge img {
+    width: 100%; height: auto; display: block;
+  }
+  .inc-card-body p {
+    font-size: 16px; line-height: 1.65; color: var(--ink-soft);
+    margin: 0 0 16px;
+  }
+  .inc-card-body p:last-child { margin-bottom: 0; }
+  .inc-card-body p strong { color: var(--ink); font-weight: 700; }
+  .inc-link {
+    color: var(--thrive-green-dark); font-weight: 700;
+    text-decoration: underline; text-underline-offset: 3px;
+    text-decoration-thickness: 1.5px;
+    transition: color 160ms ease;
+  }
+  .inc-link:hover { color: var(--thrive-green-darker); text-decoration-thickness: 2px; }
+
+  .inc-cta {
+    display: flex; justify-content: center;
+    margin-top: 36px;
+  }
+  .inc-cta .btn { min-width: 280px; }
+
+  /* ============== 06.5 Positioning + testimonial carousel ============== */
+  .voices {
+    padding: 96px 0;
+    background:
+      radial-gradient(60% 70% at 85% 18%, rgba(167,201,78,.18), transparent 65%),
+      radial-gradient(55% 60% at 10% 90%, rgba(125,150,71,.10), transparent 70%),
+      linear-gradient(180deg, #f6f9ec 0%, #ffffff 100%);
+  }
+  .voices-grid {
+    display: grid; grid-template-columns: 1.05fr 1fr; gap: 56px;
+    align-items: center; max-width: 1120px; margin: 0 auto;
+  }
+  .section-h2-left { text-align: left; margin-bottom: 18px; }
+  .voices-copy p {
+    font-size: 16.5px; line-height: 1.7;
+    color: var(--ink-soft); margin: 0 0 16px;
+  }
+  .voices-copy p strong { color: var(--ink); font-weight: 700; }
+  .voices-copy .btn { margin-top: 10px; }
+
+  .testimonial-carousel { position: relative; max-width: 560px; margin: 0 auto; }
+  .tc-stage {
+    position: relative;
+    aspect-ratio: 688 / 522;
+  }
+  .tc-slide {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: contain; object-position: center;
+    opacity: 0; transform: translateY(6px);
+    transition: opacity 600ms ease, transform 600ms ease;
+  }
+  .tc-slide.is-active { opacity: 1; transform: translateY(0); }
+  .tc-dots {
+    display: flex; justify-content: center; gap: 10px;
+    margin-top: 22px;
+  }
+  .tc-dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: rgba(125,150,61,.28);
+    border: none; cursor: pointer; padding: 0;
+    transition: background 200ms ease, transform 200ms ease, width 200ms ease;
+  }
+  .tc-dot:hover { background: rgba(125,150,61,.55); }
+  .tc-dot.is-active {
+    background: var(--thrive-green-dark);
+    width: 28px; border-radius: 99px;
+  }
+  .tc-dot:focus-visible {
+    outline: 2px solid var(--thrive-green-dark);
+    outline-offset: 3px;
+  }
+
+  /* ============== 07 Why Thrive (merged with team values accordion) ============== */
+  .why-thrive { padding: 64px 0; background: #f9fbf2; }
+  .why-grid {
+    display: grid; grid-template-columns: 1.05fr 1fr; gap: 56px;
+    align-items: center; max-width: 1120px; margin: 0 auto;
+  }
+  .why-copy h2 { text-align: left; margin-bottom: 16px; }
+  .why-copy > p { font-size: 16px; line-height: 1.7; color: var(--ink-soft); margin: 0 0 16px; }
+  .video-thumb {
+    position: relative; display: block;
+    aspect-ratio: 16 / 9;
+    border-radius: 18px; overflow: hidden;
+    box-shadow: 0 24px 50px -24px rgba(68,63,52,.35);
+    background: #2f3e0f;
+  }
+  .video-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .video-thumb::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,.45) 100%);
+  }
+  .video-thumb { transition: transform 220ms ease, box-shadow 220ms ease; }
+  .video-thumb:hover { transform: translateY(-3px); box-shadow: 0 32px 60px -24px rgba(68,63,52,.40); }
+  .video-thumb .play-btn {
+    position: absolute; z-index: 3; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 76px; height: 76px; border-radius: 999px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,.94); color: var(--thrive-green-dark, #3c622a);
+    box-shadow: 0 14px 34px -10px rgba(0,0,0,.5);
+    transition: transform 200ms ease, background 200ms ease;
+  }
+  .video-thumb .play-btn svg { width: 30px; height: 30px; margin-left: 4px; }
+  .video-thumb:hover .play-btn { transform: translate(-50%, -50%) scale(1.07); background: #fff; }
+  .video-label {
+    position: absolute; left: 20px; bottom: 16px; z-index: 2;
+    color: #fff; font-size: 17px; font-weight: 700; letter-spacing: -0.01em;
+    text-shadow: 0 2px 12px rgba(0,0,0,.45);
+  }
+
+  /* Team values block under the intro */
+  .why-team {
+    max-width: 1120px;
+    margin: 56px auto 0;
+    scroll-margin-top: 110px;
+  }
+  .why-team-h3 {
+    font-size: clamp(20px, 2vw, 24px);
+    font-weight: 800;
+    letter-spacing: -0.018em;
+    color: var(--ink);
+    margin: 0 0 20px;
+    text-align: center;
+  }
+
+  /* Always-open value cards */
+  .why-values {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .why-val-item {
+    background: #fff;
+    border: 1px solid #E6ECD4;
+    border-radius: 14px;
+    padding: 22px 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
+  }
+  .why-val-item:hover {
+    border-color: rgba(125,150,71,.45);
+    box-shadow: 0 10px 24px -18px rgba(125,150,71,.45);
+    transform: translateY(-2px);
+  }
+  .why-val-ico {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: #f4f9eb;
+    color: #2d7d5a;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .why-val-item:nth-child(1) .why-val-ico { background: #EDF4FF; color: #2c4279; }
+  .why-val-item:nth-child(2) .why-val-ico { background: #E1F6F0; color: #2d7d5a; }
+  .why-val-item:nth-child(3) .why-val-ico { background: #E5F7FC; color: #2a6378; }
+  .why-val-item:nth-child(4) .why-val-ico { background: #F4FAE4; color: #7d9647; }
+  .why-val-body { flex: 1; }
+  .why-val-title {
+    margin: 2px 0 8px;
+    font-size: 17px; font-weight: 800;
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    line-height: 1.25;
+  }
+  .why-val-body p {
+    margin: 0;
+    font-size: 14.5px; line-height: 1.65;
+    color: var(--ink-soft);
+  }
+  .why-cta { margin-top: 36px; text-align: center; }
+
+  /* ============== 06.6 Best AI SEO Agency for AI Visibility ============== */
+  .ai-visibility { padding: 64px 0; background: #fff; }
+  .aiv-head { text-align: center; max-width: 860px; margin: 0 auto 44px; }
+  .aiv-h2 {
+    font-size: clamp(28px, 3.4vw, 44px);
+    line-height: 1.12; letter-spacing: -0.025em;
+    color: var(--ink); margin: 0 0 10px;
+  }
+  .aiv-rainbow {
+    background: linear-gradient(90deg, #e8843a, #ec5f8c, #b15bd0, #5b8def, #46a98a);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+  }
+  .aiv-sub {
+    font-size: clamp(17px, 1.7vw, 22px); font-weight: 600;
+    color: var(--thrive-green); margin: 0; letter-spacing: -0.01em;
+  }
+
+  /* Stat cards */
+  .aiv-stats {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 24px; max-width: 1180px; margin: 0 auto 56px;
+  }
+  .aiv-stat {
+    border-radius: 18px; overflow: hidden; color: #fff;
+    display: flex; flex-direction: column;
+    box-shadow: 0 18px 40px -22px rgba(40,60,90,.55);
+  }
+  .aiv-stat-num {
+    font-size: clamp(34px, 4.2vw, 52px); font-weight: 800;
+    letter-spacing: -0.02em; text-align: center;
+    padding: 34px 18px 26px;
+  }
+  .aiv-stat-label {
+    font-size: 15px; font-weight: 600; text-align: center;
+    padding: 14px 18px; background: rgba(255,255,255,.12);
+  }
+  .aiv-stat-blue  { background: linear-gradient(165deg, #51719e, #3c5784); }
+  .aiv-stat-teal  { background: linear-gradient(165deg, #3791a1, #2b7d8d); }
+  .aiv-stat-green { background: linear-gradient(165deg, #44a079, #348a63); }
+
+  /* Body: copy + interactive deck */
+  .aiv-body {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 56px;
+    align-items: center; max-width: 1180px; margin: 0 auto;
+  }
+  .aiv-copy p {
+    font-size: 16.5px; line-height: 1.7; color: var(--ink-soft); margin: 0 0 18px;
+  }
+  .aiv-copy p:last-child { margin-bottom: 0; }
+  .aiv-copy a { color: var(--thrive-green-dark); font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+  .aiv-copy a:hover { color: var(--thrive-orange-dark); }
+
+  /* Tabs (icon chips) */
+  .aiv-deck { position: relative; }
+  .aiv-tabs {
+    display: flex; justify-content: center; gap: 18px; margin-bottom: 22px;
+  }
+  .aiv-tab {
+    width: 50px; height: 50px; border-radius: 50%;
+    border: 0; cursor: pointer; padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--aiv-soft, #eef1f6);
+    color: var(--aiv-accent, #5a6b86);
+    transition: transform .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease;
+  }
+  .aiv-tab svg { width: 24px; height: 24px; }
+  .aiv-tab:hover { transform: translateY(-2px); }
+  .aiv-tab:focus-visible { outline: 2px solid var(--aiv-accent, #5a6b86); outline-offset: 3px; }
+  .aiv-tab.is-active {
+    background: var(--aiv-accent, #2f4a8a); color: #fff;
+    box-shadow: 0 8px 18px -6px var(--aiv-accent, #2f4a8a);
+  }
+  .aiv-tab[data-aiv-index="0"] { --aiv-accent: #2f4a8a; --aiv-soft: #e7ecf8; }
+  .aiv-tab[data-aiv-index="1"] { --aiv-accent: #1f8198; --aiv-soft: #e1f2f6; }
+  .aiv-tab[data-aiv-index="2"] { --aiv-accent: #18936e; --aiv-soft: #e1f3ec; }
+  .aiv-tab[data-aiv-index="3"] { --aiv-accent: #2f8f57; --aiv-soft: #e4f2e8; }
+
+  /* Stacked cards. The front card sits in normal flow so the stack height
+     hugs its content; the cards behind are absolute and fill that height. */
+  .aiv-stack { position: relative; min-height: 180px; }
+  .aiv-card {
+    position: absolute; inset: 0;
+    border-radius: 22px; padding: 3px;
+    background: linear-gradient(120deg, #e8843a, #ec5f8c, #b15bd0, #5b8def, #46a98a);
+    box-shadow: 0 24px 50px -26px rgba(40,50,80,.45);
+    transition: transform .45s cubic-bezier(.22,.61,.36,1), opacity .45s ease;
+    will-change: transform, opacity;
+  }
+  .aiv-card-inner {
+    background: #fff; border-radius: 19px;
+    padding: 30px 32px; height: 100%; box-sizing: border-box;
+  }
+  .aiv-card-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .aiv-card-icon {
+    width: 38px; height: 38px; border-radius: 50%; flex: 0 0 auto;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--aiv-accent-soft); color: var(--aiv-accent);
+  }
+  .aiv-card-icon svg { width: 21px; height: 21px; }
+  .aiv-card-title {
+    font-size: 20px; font-weight: 800; letter-spacing: -0.015em;
+    color: var(--aiv-accent); text-decoration: underline; text-underline-offset: 3px;
+  }
+  .aiv-card-title:hover { color: var(--aiv-accent); opacity: .8; }
+  .aiv-card p { font-size: 16px; line-height: 1.68; color: var(--ink-soft); margin: 0; }
+  .aiv-card p a { color: var(--thrive-green-dark); font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+  .aiv-card p a:hover { color: var(--thrive-orange-dark); }
+  .aiv-card-1 { --aiv-accent: #2f4a8a; --aiv-accent-soft: #e7ecf8; }
+  .aiv-card-2 { --aiv-accent: #1f8198; --aiv-accent-soft: #e1f2f6; }
+  .aiv-card-3 { --aiv-accent: #18936e; --aiv-accent-soft: #e1f3ec; }
+  .aiv-card-4 { --aiv-accent: #2f8f57; --aiv-accent-soft: #e4f2e8; }
+
+  /* Stack positions, set via data-aiv-pos on the JS layer */
+  .aiv-card[data-aiv-pos="0"] { position: relative; transform: translateY(0) scale(1); opacity: 1; z-index: 30; }
+  .aiv-card[data-aiv-pos="1"] { transform: translateY(20px) scale(.95); opacity: .55; z-index: 20; }
+  .aiv-card[data-aiv-pos="2"] { transform: translateY(36px) scale(.9); opacity: 0; z-index: 10; }
+  .aiv-card[data-aiv-pos="3"] { transform: translateY(36px) scale(.9); opacity: 0; z-index: 10; }
+  .aiv-card[data-aiv-pos="0"] .aiv-card-inner { pointer-events: auto; }
+  .aiv-card:not([data-aiv-pos="0"]) .aiv-card-inner { pointer-events: none; }
+
+  /* Up / down nav */
+  .aiv-nav {
+    position: absolute; right: -54px; top: 50%; transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 14px; z-index: 40;
+  }
+  .aiv-arrow {
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 1px solid var(--line-strong); background: #fff;
+    color: var(--muted); cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: transform .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease;
+  }
+  .aiv-arrow:hover { color: var(--ink); border-color: var(--ink); transform: translateY(-1px); box-shadow: 0 6px 14px -8px rgba(0,0,0,.3); }
+  .aiv-arrow:focus-visible { outline: 2px solid var(--thrive-green); outline-offset: 2px; }
+
+  .aiv-cta { text-align: center; margin-top: 48px; }
+
+  /* ============== 06.7 How We Grow Your Revenue ============== */
+  .grow-revenue { padding: 64px 0; background: #fff; }
+  .gr-intro {
+    display: grid; grid-template-columns: 1.05fr 1fr; gap: 48px;
+    align-items: start;
+    max-width: 1180px; margin: 0 auto 56px;
+  }
+  .gr-intro-copy h2 { margin-bottom: 18px; }
+  .gr-intro-copy p {
+    font-size: 16.5px; line-height: 1.7;
+    color: var(--ink-soft); margin: 0 0 16px;
+  }
+  .gr-intro-copy p strong { color: var(--ink); font-weight: 700; }
+  .gr-intro-cluster {
+    display: flex; flex-wrap: wrap;
+    align-items: center; justify-content: center;
+    gap: 24px 36px;
+    padding: 8px 0;
+  }
+  .gr-logo-link {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 132px; height: 64px;
+    flex: 0 0 auto;
+    line-height: 0;
+    text-decoration: none;
+    border-radius: 10px;
+    transition: transform 200ms ease;
+  }
+  .gr-logo-link img {
+    max-height: 48px; max-width: 132px;
+    width: auto; height: auto;
+    object-fit: contain;
+    opacity: .42;
+    filter: grayscale(1);
+    transition: opacity 200ms ease, filter 200ms ease, transform 200ms ease;
+  }
+  .gr-logo-link:hover img,
+  .gr-logo-link:focus-visible img {
+    opacity: 1;
+    filter: grayscale(0);
+  }
+  .gr-logo-link:hover { transform: translateY(-2px); }
+  .gr-logo-link:focus-visible {
+    outline: 2px solid var(--thrive-green);
+    outline-offset: 4px;
+  }
+  /* Equalize the ThriveAI logo so it doesn't overpower its siblings */
+  .gr-logo-link[href="#grow-ai"] img { max-height: 38px; max-width: 110px; }
+
+  .gr-cards {
+    display: flex; flex-direction: column; gap: 24px;
+    max-width: 1180px; margin: 0 auto;
+  }
+  .gr-card {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 40px; align-items: center;
+    padding: 48px 56px;
+    border-radius: 26px;
+    box-shadow: none;
+    border: 1px solid transparent;
+    scroll-margin-top: 120px;
+  }
+  .gr-card-score  { background: #EDF4FF; border-color: #D2E1F8; }
+  .gr-card-ai     { background: #E1F6F0; border-color: #C7E9DC; }
+  .gr-card-stats  { background: #E5F7FC; border-color: #C9E7F0; }
+  .gr-card-growth { background: #E7FBEB; border-color: #CEEDD5; }
+  .gr-card-local  { background: #F4FAE4; border-color: #E1ECC1; }
+  .gr-card-copy { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; }
+  .gr-card-logo { height: 56px; width: auto; display: block; margin: 0 0 4px; }
+  .gr-card-ai .gr-card-logo { height: 44px; }
+  .gr-card-copy p {
+    font-size: 16px; line-height: 1.65;
+    color: var(--ink); margin: 0;
+  }
+  .gr-card-copy p strong { font-weight: 700; }
+  .gr-card-h3 {
+    font-size: clamp(22px, 2vw, 28px); line-height: 1.18;
+    letter-spacing: -0.018em;
+    color: var(--thrive-green-darker);
+    margin: 0;
+  }
+  .gr-learn {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 6px;
+    padding: 9px 18px;
+    border-radius: 99px;
+    background: rgba(255,255,255,.7);
+    border: 1px solid rgba(125,150,61,.35);
+    color: var(--thrive-green-dark);
+    font-size: 11px; font-weight: 800; letter-spacing: 0.14em;
+    text-decoration: none;
+    transition: background 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
+  }
+  .gr-learn svg { color: var(--thrive-green); transition: transform 200ms ease, color 160ms ease; }
+  .gr-learn:hover {
+    background: var(--thrive-green-dark);
+    border-color: var(--thrive-green-dark);
+    color: #fff;
+    transform: translateY(-1px);
+  }
+  .gr-learn:hover svg { color: #fff; transform: translateX(2px); }
+  .gr-card-visual {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 240px;
+  }
+  .gr-card-visual img {
+    max-width: 100%; height: auto; display: block;
+    filter: drop-shadow(0 20px 36px rgba(68,63,52,.22));
+  }
+  .gr-card-visual-local img {
+    max-height: 460px; width: auto;
+    filter: drop-shadow(0 24px 40px rgba(68,63,52,.25));
+  }
+
+  /* Thrive Score graphic */
+  .gr-card-visual-score img {
+    max-width: 100%; max-height: 360px; width: auto; height: auto;
+    filter: drop-shadow(0 24px 36px rgba(44, 66, 121, .18));
+  }
+
+  /* AI brands table + Stats laptop visuals — bigger frames */
+  .gr-card-visual-ai img { max-height: 360px; }
+  .gr-card-visual-stats img { max-height: 320px; }
+
+  /* GROWTH formula animated GIF (transparent, no frame) */
+  .gr-card-visual-growth {
+    min-height: 320px;
+    padding: 0;
+    background: transparent;
+  }
+  .gr-card-visual-growth img {
+    max-width: 100%;
+    max-height: 420px;
+    width: auto; height: auto;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    filter: none;
+  }
+
+  /* ============== 06.8 Top Rankings phone mockups ============== */
+  .rankings {
+    padding: 96px 0 80px;
+    background: linear-gradient(180deg, #fff 0%, #f4f9eb 100%);
+  }
+  .rk-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 56px 28px;
+    max-width: 1100px; margin: 0 auto;
+    align-items: start;
+    justify-items: center;
+  }
+  .rk-col {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 32px;
+    width: 100%;
+    max-width: 280px;
+  }
+  .rk-pill {
+    display: inline-flex; align-items: center;
+    padding: 11px 24px;
+    border-radius: 99px;
+    color: #fff;
+    font-size: 15px; font-weight: 700;
+    letter-spacing: -0.01em;
+    box-shadow: 0 10px 24px -12px rgba(68,63,52,.35);
+  }
+  .rk-pill-green { background: #2d7d5a; }
+  .rk-pill-blue  { background: #2c4279; }
+  .rk-pill-teal  { background: #2a6378; }
+  .rk-phone {
+    max-width: 100%; width: 260px; height: auto;
+    display: block;
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 62%, rgba(0,0,0,.4) 86%, transparent 100%);
+            mask-image: linear-gradient(180deg, #000 0%, #000 62%, rgba(0,0,0,.4) 86%, transparent 100%);
+    -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%;
+            mask-size: 100% 100%;
+  }
+
+  /* ============== 09 Closing CTA ============== */
+  .closing-cta { padding: 80px 0 56px; background: linear-gradient(180deg, #f6f9ec, #fff); }
+
+  .rg-card {
+    position: relative;
+    max-width: 1120px; margin: 40px auto 56px;
+    background: linear-gradient(125deg, #8aa050 0%, #94ad53 55%, #a5be5d 100%);
+    border-radius: 26px;
+    padding: 60px 64px 60px;
+    display: grid; grid-template-columns: 1fr 340px;
+    gap: 32px; align-items: stretch;
+    box-shadow: 0 30px 60px -34px rgba(95, 117, 50, .50);
+    overflow: hidden;
+  }
+  .rg-card-bg {
+    position: absolute; inset: 0;
+    border-radius: 26px;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .rg-card-bg svg { width: 100%; height: 100%; display: block; }
+  .rg-card-copy { position: relative; z-index: 2; }
+  .rg-h2 {
+    font-size: clamp(28px, 3.4vw, 40px);
+    line-height: 1.1; letter-spacing: -0.022em;
+    color: #fff;
+    margin: 0 0 16px;
+    text-align: left;
+    text-transform: uppercase;
+    font-weight: 800;
+  }
+  .rg-card-copy p {
+    font-size: 16px; line-height: 1.65;
+    color: rgba(255,255,255,.94);
+    margin: 0 0 28px;
+    max-width: 560px;
+  }
+  .rg-actions {
+    display: flex; align-items: center; gap: 14px;
+    flex-wrap: wrap;
+  }
+  .rg-or {
+    color: rgba(255,255,255,.95);
+    font-size: 13px; font-weight: 800; letter-spacing: 0.08em;
+  }
+  .btn-ghost-light {
+    background: #fff; color: var(--thrive-orange);
+    border: 1.5px solid #fff;
+  }
+  .btn-ghost-light:hover {
+    background: #fff; color: var(--thrive-orange-dark);
+    transform: translateY(-1px);
+  }
+  .rg-card-photo {
+    position: absolute;
+    right: 0; bottom: 0;
+    width: auto; max-width: 42%;
+    height: 100%;
+    z-index: 3;
+    pointer-events: none;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+  }
+  .rg-card-photo img {
+    height: 100%; width: auto;
+    max-width: 100%;
+    display: block;
+    object-fit: contain;
+    object-position: right bottom;
+    filter: drop-shadow(-12px 18px 30px rgba(0,0,0,.22));
+  }
+
+  .btn-lg { padding: 16px 28px; font-size: 15px; }
+  .awards-section { padding: 32px 0 56px; background: #ffffff; border-bottom: 1px solid var(--line); }
+  .awards-eyebrow {
+    display: block; text-align: center;
+    font-size: 11px; font-weight: 800; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--ink-soft);
+    margin: 0 0 22px;
+  }
+  .awards-strip { max-width: 1180px; margin: 0 auto; text-align: center; }
+  .awards-strip img { width: 100%; height: auto; }
+  .awards-strip .awards-desktop { display: block; }
+  .awards-strip .awards-mobile { display: none; }
+
+  /* ============== Footer (dark, brand + cities + CTA) ============== */
+  .site-footer {
+    position: relative;
+    background: #403C33;
+    color: #f6f1e6;
+    padding: 0;
+    overflow: hidden;
+    isolation: isolate;
+    border-top: none;
+    font-size: inherit;
+  }
+  /* Override global .site-footer .wrap grid in public/styles.css */
+  .site-footer .wrap { display: block; grid-template-columns: none; gap: 0; }
+  .footer-bg {
+    position: absolute;
+    top: 50%; right: -120px;
+    transform: translateY(-50%);
+    width: 620px; height: 620px;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 1;
+    display: block;
+  }
+  .footer-bg img {
+    width: 100%; height: 100%; object-fit: contain;
+    filter: brightness(0) saturate(100%) invert(22%) sepia(8%) saturate(900%) hue-rotate(10deg) brightness(95%) contrast(85%);
+    opacity: .55;
+  }
+  .footer-main { position: relative; z-index: 1; }
+  .footer-bottom { position: relative; z-index: 1; }
+
+  /* 24px sides match .wrap; the shorthand here would otherwise zero out
+     .wrap's horizontal padding and push footer content to the edge. */
+  .footer-main { padding: 64px 24px 40px; }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 1.4fr 0.95fr;
+    gap: 56px;
+    align-items: start;
+  }
+
+  /* Brand column */
+  .footer-brand .footer-logo {
+    display: inline-block; line-height: 0; margin-bottom: 18px;
+  }
+  .footer-brand .footer-logo svg { display: block; height: 56px; width: auto; }
+  .footer-h2 {
+    color: #ffffff;
+    font-size: clamp(34px, 3.4vw, 44px);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    font-weight: 800;
+    margin: 0 0 22px;
+  }
+  .footer-h2 em {
+    font-style: normal; font-weight: 800;
+    color: #7D963D;
+  }
+  .footer-desc {
+    color: rgba(246,241,230,.78);
+    font-size: 14px; line-height: 1.65;
+    margin: 0 0 26px;
+    max-width: 460px;
+  }
+  .footer-desc strong { color: #ffffff; font-weight: 700; }
+
+  .footer-social {
+    list-style: none; padding: 0; margin: 0;
+    display: flex; gap: 10px;
+  }
+  .footer-social a {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: rgba(255,255,255,.08);
+    color: #f6f1e6;
+    transition: background-color 160ms ease, transform 160ms ease, color 160ms ease;
+  }
+  .footer-social a:hover {
+    background: #7D963D; color: #2f3e0f;
+    transform: translateY(-1px);
+  }
+  .footer-social a:focus-visible {
+    outline: 2px solid #7D963D; outline-offset: 2px;
+  }
+
+  /* Cities column */
+  .footer-cities { padding-top: 78px; }
+  .cities-label {
+    display: flex; align-items: center; gap: 8px;
+    color: #7D963D;
+    font-size: 14px; font-weight: 700;
+    margin: 0 0 22px;
+    letter-spacing: 0;
+  }
+  .cities-label svg { display: inline-block; }
+  .cities-grid {
+    list-style: none; padding: 0; margin: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px 24px;
+  }
+  .cities-grid li { margin: 0; }
+  .cities-grid a {
+    color: rgba(246,241,230,.85);
+    font-size: 14px;
+    font-weight: 400;
+    text-decoration: none;
+    transition: color 140ms ease;
+  }
+  .cities-grid a:hover { color: #7D963D; }
+  .cities-grid a:focus-visible { outline: 2px solid #7D963D; outline-offset: 2px; border-radius: 2px; }
+
+  /* CTA card */
+  .footer-cta { padding-top: 56px; }
+  .cta-card {
+    position: relative;
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 26px 28px 28px;
+    color: var(--ink);
+    box-shadow: 0 30px 50px -28px rgba(0,0,0,.45);
+    overflow: hidden;
+    isolation: isolate;
+    min-height: 240px;
+  }
+  /* Stack the proposal button and phone number vertically — inline they
+     sit on one cramped line and the number collides with the tree art. */
+  .cta-content { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: flex-start; }
+  .cta-h3 {
+    color: var(--ink);
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    margin: 0 0 10px;
+  }
+  .cta-text {
+    color: var(--ink-soft);
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0 0 18px;
+    max-width: 220px;
+  }
+  .cta-btn {
+    display: inline-flex;
+    height: 42px;
+    padding: 0 22px;
+    font-size: 13px;
+    line-height: 1;
+    margin-bottom: 16px;
+    letter-spacing: 0.04em;
+  }
+  .cta-phone {
+    display: inline-block;
+    color: var(--thrive-orange);
+    font-weight: 700;
+    font-size: 19px;
+    letter-spacing: -0.005em;
+    text-decoration: none;
+    transition: color 140ms ease;
+    position: relative;
+    z-index: 3;
+  }
+  .cta-phone:hover { color: var(--thrive-orange-dark); }
+  .cta-tree {
+    position: absolute;
+    right: -34px; bottom: -28px;
+    width: 140px; height: 140px;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 1;
+  }
+  .cta-tree img { width: 100%; height: 100%; object-fit: contain; }
+
+  /* Footer bottom */
+  .footer-bottom {
+    padding: 22px 24px 28px;
+    border-top: 1px solid rgba(246,241,230,.12);
+    position: relative; z-index: 1;
+  }
+  .footer-bottom p {
+    margin: 0;
+    color: rgba(246,241,230,.7);
+    font-size: 13px;
+    line-height: 1.6;
+    display: flex; flex-wrap: wrap; align-items: center;
+    gap: 0 6px;
+  }
+  .footer-bottom a {
+    color: rgba(246,241,230,.7);
+    text-decoration: none;
+    transition: color 140ms ease;
+  }
+  .footer-bottom a:hover { color: #7D963D; }
+  .footer-bottom .sep {
+    color: rgba(246,241,230,.32);
+    margin: 0 4px;
+  }
+
+  /* ============== Responsive ============== */
+  @media (max-width: 980px) {
+    .hero-grid { gap: 16px !important; grid-template-columns: 1fr !important; }
+    .hero-team { margin-top: 12px; }
+    .ts-bar { gap: 28px 36px; }
+    .ts-bar-item { gap: 12px; }
+    .rv-grid { grid-template-columns: 1fr; }
+    .wins-grid { grid-template-columns: 1fr 1fr; }
+    .voices-grid { grid-template-columns: 1fr; gap: 36px; }
+    .section-h2-left { text-align: center; }
+    .voices-copy { text-align: center; }
+    .testimonial-carousel { max-width: 480px; }
+    .why-grid { grid-template-columns: 1fr; gap: 28px; text-align: left; }
+    .why-team { margin-top: 36px; }
+    .why-values { grid-template-columns: 1fr; gap: 14px; }
+    .inc-card { padding: 200px 28px 36px; }
+    .inc-card-badge {
+      position: absolute; left: 50%; top: 36px;
+      transform: translateX(-50%) rotate(-7deg);
+      width: 220px;
+    }
+    .why-copy h2 { text-align: left; }
+    .awards-strip .awards-desktop { display: none; }
+    .awards-strip .awards-mobile { display: block; }
+    .gr-intro { grid-template-columns: 1fr; gap: 36px; }
+    .gr-intro-copy { text-align: center; }
+    .gr-intro-copy h2 { text-align: center; }
+    .gr-intro-cluster { max-width: 420px; margin: 0 auto; }
+    .gr-card { grid-template-columns: 1fr; gap: 28px; padding: 40px 32px; }
+    .gr-card-copy { align-items: center; text-align: center; }
+    .aiv-body { grid-template-columns: 1fr; gap: 36px; }
+    .aiv-copy { text-align: center; max-width: 620px; margin: 0 auto; }
+    .aiv-deck { max-width: 560px; margin: 0 auto; width: 100%; padding-bottom: 62px; }
+    .aiv-nav {
+      top: auto; bottom: -58px; left: 50%; right: auto;
+      transform: translateX(-50%);
+      flex-direction: row;
+    }
+    .rk-grid { grid-template-columns: 1fr; gap: 48px; max-width: 320px; }
+    .rg-card { grid-template-columns: 1fr; padding: 36px 24px 0; text-align: center; }
+    .rg-h2 { text-align: center; }
+    .rg-card-copy p { margin-left: auto; margin-right: auto; }
+    .rg-actions { justify-content: center; }
+    .rg-card-photo {
+      position: relative;
+      left: auto; right: auto; bottom: auto;
+      transform: none;
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      margin-top: 24px;
+      display: flex; justify-content: center; align-items: flex-end;
+    }
+    .rg-card-photo img {
+      height: auto; width: auto;
+      max-width: 240px; max-height: 320px;
+      object-position: center bottom;
+    }
+    .gr-card-visual-growth { min-height: 240px; }
+    .gr-card-visual-growth img { max-height: 320px; }
+
+    .footer-grid { grid-template-columns: 1fr; gap: 48px; }
+    .footer-cities { padding-top: 0; }
+    .footer-cta { padding-top: 0; max-width: 380px; }
+    .footer-desc { max-width: none; }
+    .footer-bg { width: 360px; opacity: .05; right: -120px; }
+  }
+  @media (max-width: 640px) {
+    .wins-grid { grid-template-columns: 1fr; }
+    .section-h2 { font-size: 26px; }
+    .rv-body { padding: 18px 18px 22px; }
+    .rv-quote { font-size: 16px; }
+    .results-videos, .wins-strip, .inc5000-callout, .voices, .why-thrive, .closing-cta, .grow-revenue, .rankings { padding: 56px 0; }
+    .why-acc-summary { padding: 14px 16px; }
+    .why-acc-body { padding: 0 16px 16px 16px; }
+    .inc-card { padding: 180px 20px 32px; border-radius: 22px; }
+    .inc-card-badge { width: 180px; top: 28px; }
+    .ts-marquee-row { gap: 40px; padding-right: 40px; }
+    .ts-marquee-row li { height: 52px; min-width: 96px; }
+    .ts-marquee-row img { max-height: 44px; }
+    .aiv-stats { grid-template-columns: 1fr; gap: 16px; max-width: 360px; margin: 0 auto 44px; }
+    .aiv-stat-num { padding: 26px 18px 20px; }
+    .aiv-card-inner { padding: 26px 22px; }
+    .aiv-card-title { font-size: 18px; }
+    .aiv-card p { font-size: 15px; }
+    .aiv-cta .btn {
+      white-space: normal; height: auto; min-height: 54px;
+      padding: 15px 26px; line-height: 1.25; max-width: 100%;
+    }
+    .gr-card { padding: 32px 22px; border-radius: 22px; }
+    .gr-card-logo { height: 44px; }
+    .gr-card-h3 { font-size: 20px; }
+    .gr-card-copy p { font-size: 15px; }
+    .rk-pill { font-size: 14px; padding: 10px 20px; }
+    .rk-phone { width: 260px; }
+    .rg-card { padding: 32px 20px 0; border-radius: 22px; }
+    .rg-actions .btn-lg { width: 100%; }
+    .rg-or { width: 100%; text-align: center; }
+
+    /* Long-label section CTAs can't stay on one line on a phone; let them
+       wrap and grow vertically instead of overflowing past the screen. */
+    .rv-cta .btn, .why-cta .btn, .inc-cta .btn, .voices-copy .btn {
+      white-space: normal;
+      height: auto;
+      min-height: 54px;
+      padding: 15px 26px;
+      line-height: 1.25;
+      max-width: 100%;
+    }
+
+    .footer-main { padding: 48px 24px 32px; }
+    .footer-h2 { font-size: 32px; }
+    .cities-grid { grid-template-columns: repeat(2, 1fr); gap: 12px 18px; }
+    .footer-bottom p { font-size: 12px; gap: 0 4px; }
+    .footer-bottom .sep { margin: 0 2px; }
+  }
+</style>
+
+<script src="/script.js?v=2026052902" is:inline></script>
+<script is:inline>
+  // ============== Contact form submission ==============
+  // Cloned from src/pages/hvac-form/index.astro form handler.
+  // Reads window.thriveZohoForm.receiverUrl, fills attribution from
+  // window.thriveAttribution (utm-capture.js), POSTs JSON to receiver,
+  // fires PostHog + Google Ads conversion, redirects to /thank-you/.
+  (function () {
+    var form = document.getElementById('contactForm');
+    if (!form) return;
+    var card = form.closest('.lead-form-card');
+    var successEl = card && card.querySelector('.lf-success');
+
+    function validateField(input) {
+      var ok = input.checkValidity();
+      var fieldEl = input.closest('.field');
+      if (fieldEl) fieldEl.classList.toggle('is-error', !ok);
+      return ok;
+    }
+    Array.prototype.forEach.call(form.querySelectorAll('input, select'), function (el) {
+      el.addEventListener('blur', function () { if (el.required) validateField(el); });
+      el.addEventListener('input', function () {
+        var fieldEl = el.closest('.field');
+        if (fieldEl && fieldEl.classList.contains('is-error') && el.checkValidity()) {
+          fieldEl.classList.remove('is-error');
+        }
+      });
+    });
+
+    function fillAttribution() {
+      var a = window.thriveAttribution || {};
+      ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','gclid'].forEach(function (k) {
+        var el = form.querySelector('input[name="' + k + '"]');
+        if (el && a[k]) el.value = a[k];
+      });
+      var ref = form.querySelector('input[name="referrer"]');
+      if (ref) ref.value = document.referrer || '';
+    }
+
+    function buildPayload() {
+      var data = {};
+      Array.prototype.forEach.call(form.elements, function (el) {
+        if (!el.name || el.type === 'submit') return;
+        data[el.name] = el.value || '';
+      });
+      data.submitted_at = new Date().toISOString();
+      data.page_url = window.location.href;
+      return data;
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var allOk = true;
+      Array.prototype.forEach.call(form.querySelectorAll('input[required], select[required]'), function (el) {
+        if (!validateField(el)) allOk = false;
+      });
+      if (!allOk) {
+        var firstError = form.querySelector('.field.is-error input, .field.is-error select');
+        if (firstError) firstError.focus();
+        return;
+      }
+      fillAttribution();
+      var btn = form.querySelector('button[type="submit"]');
+      if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+
+      var cfg = window.thriveZohoForm || {};
+      var payload = buildPayload();
+
+      if (window.posthog && typeof window.posthog.capture === 'function') {
+        try {
+          window.posthog.capture('home_form_submitted', {
+            company: form.querySelector('[name="company"]').value,
+            budget: form.querySelector('[name="budget"]').value,
+            company_size: form.querySelector('[name="company_size"]').value,
+            landing_page: 'home',
+          });
+        } catch (err) {}
+      }
+      if (window.gtag) {
+        try {
+          window.gtag('event', 'conversion', {
+            send_to: 'AW-18163893174/thcOCN2CirEcELaHnNVD',
+            value: 200.0, currency: 'USD',
+          });
+        } catch (err) {}
+      }
+
+      fetch(cfg.receiverUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+        .then(function (r) { return r.json().catch(function () { return null; }); })
+        .then(function (j) {
+          if (window.console && j) console.log('[Thrive form] receiver:', j);
+          redirectToThankYou(j);
+        })
+        .catch(function (err) {
+          if (window.console) console.warn('[Thrive form] submit error (still redirecting):', err);
+          redirectToThankYou(null);
+        });
+
+      function redirectToThankYou(j) {
+        var params = new URLSearchParams({
+          source: 'form',
+          first_name: payload.first_name || '',
+          landing_page: 'home',
+        });
+        if (j && j.zoho && j.zoho.id) params.set('lead', j.zoho.id);
+        window.location.href = '/thank-you/?' + params.toString();
+      }
+    });
+
+    function showSuccess() {
+      if (!successEl) return;
+      form.hidden = true;
+      successEl.hidden = false;
+      if (card && card.scrollIntoView) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    var qs = new URLSearchParams(window.location.search);
+    if (qs.get('submitted') === '1') showSuccess();
+  })();
+</script>
+<script is:inline>
+  // ============== Client testimonial carousel ==============
+  // Auto-advances every 6s. Pauses on hover / focus inside.
+  // Clicking a dot jumps to a slide and restarts the timer.
+  (function () {
+    var root = document.querySelector('[data-tc]');
+    if (!root) return;
+    var slides = root.querySelectorAll('.tc-slide');
+    var dots = root.querySelectorAll('.tc-dot');
+    if (!slides.length || slides.length !== dots.length) return;
+
+    var idx = 0;
+    var timer = null;
+    var INTERVAL = 6000;
+
+    function show(i) {
+      idx = (i + slides.length) % slides.length;
+      for (var j = 0; j < slides.length; j++) {
+        slides[j].classList.toggle('is-active', j === idx);
+        dots[j].classList.toggle('is-active', j === idx);
+        dots[j].setAttribute('aria-selected', j === idx ? 'true' : 'false');
+      }
+    }
+    function next() { show(idx + 1); }
+    function start() { stop(); timer = window.setInterval(next, INTERVAL); }
+    function stop() { if (timer) { window.clearInterval(timer); timer = null; } }
+
+    for (var k = 0; k < dots.length; k++) {
+      (function (i) {
+        dots[i].addEventListener('click', function () { show(i); start(); });
+      })(k);
+    }
+    root.addEventListener('mouseenter', stop);
+    root.addEventListener('mouseleave', start);
+    root.addEventListener('focusin', stop);
+    root.addEventListener('focusout', start);
+
+    // Respect users who prefer no motion: still rotate, but no autoplay.
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+    start();
+  })();
+</script>
+<!-- Zoho CRM <-> Google Ads tracking: zcga.js captures the GCLID into the #zc_gad form field. -->
+<script type="text/javascript" src="https://crmplus.zoho.com/crm/javascript/zcga.js"></script>
+</body>
+</html>
