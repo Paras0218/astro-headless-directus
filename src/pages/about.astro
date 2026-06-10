@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { Icon } from 'astro-icon/components';
 import { getAbout } from '../lib/directus';
 
 export const prerender = false;
@@ -11,6 +12,12 @@ const stats = [
   { value: about.stat2_value, label: about.stat2_label },
   { value: about.stat3_value, label: about.stat3_label },
   { value: about.stat4_value, label: about.stat4_label },
+];
+
+const ogCards = [
+  { icon: about.og_card1_icon, title: about.og_card1_title, sub: about.og_card1_sub },
+  { icon: about.og_card2_icon, title: about.og_card2_title, sub: about.og_card2_sub },
+  { icon: about.og_card3_icon, title: about.og_card3_title, sub: about.og_card3_sub },
 ];
 ---
 <Layout title={about.seo_title} description={about.seo_description}>
@@ -32,6 +39,40 @@ const stats = [
     <div class="max-w-3xl mx-auto px-4">
       <h2 class="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl mb-6">{about.story_heading}</h2>
       <p class="text-lg text-slate-600 leading-relaxed whitespace-pre-line">{about.story_body}</p>
+    </div>
+  </section>
+
+  <!-- Optimize / Generate / Grow -->
+  <section class="py-24 bg-white border-t border-slate-100">
+    <div class="max-w-5xl mx-auto px-4 text-center">
+      <p class="text-lg text-slate-600 leading-relaxed max-w-3xl mx-auto">{about.og_intro}</p>
+
+      <div class="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-10 max-w-4xl mx-auto">
+        {ogCards.map((card) => (
+          <div class="flex flex-col items-center">
+            <div class="w-28 h-28 rounded-2xl bg-slate-50 flex items-center justify-center shadow-sm">
+              <Icon name={'lucide:' + (card.icon || 'circle')} class="w-12 h-12 text-[#7ab317]" />
+            </div>
+            <h3 class="mt-5 text-xl font-extrabold tracking-wide text-slate-800 uppercase">{card.title}</h3>
+            <p class="mt-1 text-slate-500">{card.sub}</p>
+          </div>
+        ))}
+      </div>
+
+      <div class="mt-14 flex flex-wrap items-center justify-center gap-4">
+        <a
+          href={about.og_cta1_url}
+          class="inline-block bg-orange-600 text-white font-bold py-3 px-8 rounded-full shadow-md hover:bg-orange-700 transition-colors duration-200"
+        >
+          {about.og_cta1_text}
+        </a>
+        <a
+          href={about.og_cta2_url}
+          class="inline-block border-2 border-orange-500 text-orange-600 font-bold py-3 px-8 rounded-full hover:bg-orange-50 transition-colors duration-200"
+        >
+          {about.og_cta2_text}
+        </a>
+      </div>
     </div>
   </section>
 

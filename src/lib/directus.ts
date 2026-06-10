@@ -220,6 +220,21 @@ export interface About {
   cta_text: string;
   cta_button_label: string;
   cta_button_url: string;
+  // Optimize / Generate / Grow section (three icon cards + two CTAs)
+  og_intro: string;
+  og_card1_icon: string; // Lucide icon name (e.g. "settings")
+  og_card1_title: string;
+  og_card1_sub: string;
+  og_card2_icon: string;
+  og_card2_title: string;
+  og_card2_sub: string;
+  og_card3_icon: string;
+  og_card3_title: string;
+  og_card3_sub: string;
+  og_cta1_text: string;
+  og_cta1_url: string;
+  og_cta2_text: string;
+  og_cta2_url: string;
 }
 
 export const DEFAULT_ABOUT: About = {
@@ -248,6 +263,13 @@ export const DEFAULT_ABOUT: About = {
   cta_text: 'Tell us about your objectives and we will put together a tailored proposal.',
   cta_button_label: 'Get Your Free Proposal',
   cta_button_url: '/',
+  og_intro:
+    'Thrive Internet Marketing Agency is an award-winning digital marketing company that offers a full spectrum of data-driven web marketing services. We develop growth-oriented online marketing campaigns that make a positive impact on businesses.',
+  og_card1_icon: 'settings', og_card1_title: 'OPTIMIZE', og_card1_sub: 'Marketing Processes',
+  og_card2_icon: 'circle-check', og_card2_title: 'GENERATE', og_card2_sub: 'Targeted Results',
+  og_card3_icon: 'bar-chart-3', og_card3_title: 'GROW', og_card3_sub: 'Your Brand Online',
+  og_cta1_text: 'STRATEGY-FIRST AGENCY', og_cta1_url: '/',
+  og_cta2_text: 'GET MY FREE PROPOSAL', og_cta2_url: '/',
 };
 
 function mergeAbout(data: Partial<About>): About {
