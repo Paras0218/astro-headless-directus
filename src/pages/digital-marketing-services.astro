@@ -33,9 +33,9 @@ const BTN_GHOST = 'inline-flex items-center justify-center rounded-full border-2
 <Layout title={dms.seo_title || 'Digital Marketing Services | Thrive'} description={dms.seo_description}>
   <!-- ============== Hero ============== -->
   <section class="relative overflow-hidden bg-gradient-to-b from-[#eef5e0] via-[#f6faf0] to-white">
-    <div class="pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full bg-[#cfe39b]/40 blur-3xl"></div>
-    <div class="pointer-events-none absolute -right-24 bottom-0 h-72 w-72 rounded-full bg-[#cfe39b]/40 blur-3xl"></div>
-    <div class="relative max-w-3xl mx-auto px-4 py-20 text-center">
+    <div aria-hidden="true" class="pointer-events-none absolute left-0 top-0 bottom-0 w-[30%] max-w-[460px]" style="background:url(/assets/dms-strategy/subpage-header-left-corner.svg) no-repeat left bottom; background-size:contain;"></div>
+    <div aria-hidden="true" class="pointer-events-none absolute right-0 top-0 bottom-0 w-[30%] max-w-[460px]" style="background:url(/assets/dms-strategy/subpage-header-right-corner.svg) no-repeat right bottom; background-size:contain;"></div>
+    <div class="relative z-10 max-w-3xl mx-auto px-4 py-20 text-center">
       <h1 class="text-4xl md:text-5xl font-extrabold text-[#333] tracking-tight">{dms.hero_h1}</h1>
       <p class="mt-4 text-lg md:text-xl text-[#5f8f12] font-medium">{dms.hero_sub}</p>
       <form action="/" method="get" class="mt-8 mx-auto max-w-xl rounded-2xl bg-white/70 p-3 shadow-sm flex flex-col sm:flex-row gap-3">

@@ -22,3 +22,6 @@ node_modules/
 
 # nested duplicate project copy — excluded from version control
 Astro_thrive_directus/
+
+# archives / distributables
+*.zip

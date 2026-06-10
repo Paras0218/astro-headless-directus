@@ -272,6 +272,47 @@ export async function getAbout(): Promise<About> {
 }
 
 // ---------------------------------------------------------------------------
+// Search results page (singleton) — CMS-editable labels, same fail-safe pattern.
+// ---------------------------------------------------------------------------
+
+export interface SearchPage {
+  seo_title: string;
+  results_heading: string;
+  no_results_text: string;
+  empty_prompt: string;
+  input_placeholder: string;
+}
+
+export const DEFAULT_SEARCH_PAGE: SearchPage = {
+  seo_title: 'Search',
+  results_heading: 'Search Results For:',
+  no_results_text: 'Sorry, no posts were found.',
+  empty_prompt: 'Enter a term above to search the site.',
+  input_placeholder: 'Search this website',
+};
+
+function mergeSearchPage(data: Partial<SearchPage>): SearchPage {
+  const result: SearchPage = { ...DEFAULT_SEARCH_PAGE };
+  for (const key of Object.keys(DEFAULT_SEARCH_PAGE) as Array<keyof SearchPage>) {
+    const value = data[key];
+    if (typeof value === 'string' && value.trim() !== '') {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
+export async function getSearchPage(): Promise<SearchPage> {
+  try {
+    const data = await directusGet<Partial<SearchPage> | null>('/items/search_page');
+    if (!data) return { ...DEFAULT_SEARCH_PAGE };
+    return mergeSearchPage(data);
+  } catch {
+    return { ...DEFAULT_SEARCH_PAGE };
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Site header (singleton) + nav items (repeatable) — CMS-editable, fail-safe.
 // ---------------------------------------------------------------------------
 
@@ -540,3 +581,54 @@ export const getDmsTools = () => getList<DmsTool>('dms_tools');
 export const getDmsServices = () => getList<DmsService>('dms_services');
 export const getDmsReasons = () => getList<DmsReason>('dms_reasons');
 export const getDmsFaqs = () => getList<DmsFaq>('dms_faqs');
+
+// ---------------------------------------------------------------------------
+// Digital Marketing Strategy Development page — singleton `dms_strategy`.
+// Content-heavy sub-service page; follows the same pattern as `dms` (content
+// lives in Directus, returns {} when unreachable so the page never crashes).
+// Repeating groups are stored as newline-separated, "|"-delimited rows
+// (same convention as home_wins.stat1) and parsed in the .astro page.
+// ---------------------------------------------------------------------------
+
+export interface DMSStrategy {
+  seo_title: string; seo_description: string;
+  hero_h1: string; hero_sub: string; hero_form_button: string;
+  intro_h2: string; intro_sub: string; intro_body: string;
+  why_eyebrow: string; why_h2: string; why_body: string;
+  allows_title: string; allows_list: string;   // newline bullets
+  fail_title: string; fail_list: string;        // newline bullets
+  guide_h2: string; guide_sub: string; cta_band_text: string; cta_band_url: string;
+  approach_eyebrow: string; approach_h2: string; approach_body: string;
+  approach_items: string;                        // "Title | Description" per line
+  industry_eyebrow: string; industry_h2: string; industry_body: string;
+  industry_items: string; industry_footer: string; // "Title | Description" per line
+  included_eyebrow: string; included_h2: string; included_body: string;
+  included_s1_title: string; included_s1_list: string;
+  included_s2_title: string; included_s2_list: string;
+  included_s3_title: string; included_s3_list: string;
+  case_eyebrow: string; case_h2: string; case_body: string; case_label: string; case_desc: string;
+  case_stat1_num: string; case_stat1_label: string;
+  case_stat2_num: string; case_stat2_label: string;
+  case_stat3_num: string; case_stat3_label: string;
+  focus_pre_h2: string; focus_eyebrow: string; focus_h2: string; focus_body: string;
+  focus_items: string; focus_footer: string;     // "Title | Description" per line
+  formula_eyebrow: string; formula_h2: string; formula_body: string;
+  formula_items: string;                          // "Title | Description" per line
+  services_eyebrow: string; services_h2: string; services_body: string;
+  services_items: string;                         // one title per line
+  process_eyebrow: string; process_h2: string; process_body: string; process_footer: string;
+  phases_items: string;                           // "Phase | Subtitle | Description" per line
+  whychoose_eyebrow: string; whychoose_h2: string; whychoose_body: string;
+  reasons_items: string;                          // "Title | Description" per line
+  faqs_h2: string; faqs_items: string;            // "Question | Answer" per line
+  cta_h2: string; cta_text: string; cta_btn1_text: string; cta_btn1_url: string; cta_btn2_text: string;
+}
+
+export async function getDMSStrategy(): Promise<DMSStrategy> {
+  try {
+    const data = await directusGet<DMSStrategy | null>('/items/dms_strategy');
+    return data ?? ({} as DMSStrategy);
+  } catch {
+    return {} as DMSStrategy;
+  }
+}

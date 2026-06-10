@@ -151,7 +151,7 @@ function sideGridClass(n: number): string {
                                     <h4 class="font-extrabold text-[#333] text-sm leading-tight tracking-normal rounded-md -ml-2 px-2 py-1 -my-1 transition-colors hover:bg-[#e0ecca] hover:text-black">{cat.title}</h4>
                                   )}
                                 </div>
-                                <ul class="space-y-1.5 list-disc pl-5 m-0 marker:text-[#555]">
+                                <ul class="space-y-1.5 list-disc pl-[56px] m-0 marker:text-[#555]">
                                   {cat.links.map((l) => (
                                     <li class="text-[15px] leading-snug">
                                       <a href={l.url} class="font-medium tracking-normal text-[#49453b] hover:text-[#7ab317] transition-colors">{l.label}</a>
@@ -212,9 +212,22 @@ function sideGridClass(n: number): string {
         </span>
         {header.phone}
       </a>
-      <button type="button" aria-label="Search" class="w-10 h-10 rounded-full bg-[#7ab317] text-white flex items-center justify-center hover:bg-[#6a9a13] transition-colors">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-      </button>
+      <div class="relative" data-search>
+        <button type="button" aria-label="Search" aria-expanded="false" data-search-toggle class="h-8 min-w-[55px] rounded-full bg-[#7D963D] text-white flex items-center justify-center hover:bg-[#5d7129] transition-colors cursor-pointer">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        </button>
+
+        <!-- Drop-down search — mirrors the WordPress header search (hidden until the icon
+             is clicked; GET to "/" with ?s=, like .widget_search .search-form). -->
+        <form role="search" method="get" action="/search" data-search-form class="hidden absolute right-0 top-[calc(100%+12px)] z-[9998] w-[300px]">
+          <div class="searchbox flex items-center gap-1.5 rounded-lg bg-white p-1.5 shadow-[0_16px_24px_-14px_rgba(0,0,0,0.18)]">
+            <input type="search" name="s" required autocomplete="off" placeholder="Search this website" data-search-input class="min-w-0 flex-1 h-9 px-3 text-[15px] text-[#555] bg-transparent focus:outline-none" />
+            <button type="submit" aria-label="Submit search" class="h-9 w-9 shrink-0 rounded-md bg-[#7D963D] hover:bg-[#5d7129] text-white flex items-center justify-center transition-colors cursor-pointer">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            </button>
+          </div>
+        </form>
+      </div>
       <button type="button" data-mobile-toggle aria-label="Menu" class="lg:hidden w-10 h-10 flex items-center justify-center text-[#333]">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
       </button>
@@ -269,6 +282,27 @@ function sideGridClass(n: number): string {
   const toggle = document.querySelector('[data-mobile-toggle]');
   const menu = document.getElementById('mobileMenu');
   toggle?.addEventListener('click', () => menu?.classList.toggle('hidden'));
+
+  // Header search: click the icon to reveal a drop-down search form (mirrors the
+  // WordPress header search). Closes on outside click and Escape.
+  const searchWrap = document.querySelector('[data-search]');
+  const searchToggle = searchWrap?.querySelector('[data-search-toggle]');
+  const searchForm = searchWrap?.querySelector('[data-search-form]');
+  const searchInput = searchWrap?.querySelector('[data-search-input]') as HTMLInputElement | null;
+  function closeSearch() {
+    searchForm?.classList.add('hidden');
+    searchToggle?.setAttribute('aria-expanded', 'false');
+  }
+  searchToggle?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const nowHidden = searchForm?.classList.toggle('hidden');
+    searchToggle.setAttribute('aria-expanded', String(!nowHidden));
+    if (!nowHidden) searchInput?.focus();
+  });
+  document.addEventListener('click', (e) => {
+    if (searchWrap && e.target instanceof Node && !searchWrap.contains(e.target)) closeSearch();
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSearch(); });
 </script>
 
 <style>
@@ -279,6 +313,7 @@ function sideGridClass(n: number): string {
      preflight (absent on the homepage). Set these hairlines explicitly so they match. */
   .megapanel { border-top: 1px solid #e6e8eb; }
   .dropbox { border: 1px solid #eef1f4; }
+  .searchbox { border: 1px solid #e6e8eb; }
   /* Chevron flips to "up" on hover. Explicit transform (not Tailwind rotate-180)
      so it works on the homepage too, which has no Tailwind preflight to init the
      transform CSS variables. */
@@ -290,18 +325,19 @@ function sideGridClass(n: number): string {
   /* SINGLE SOURCE OF TRUTH for header form-control resets.
      The homepage bundles Tailwind WITHOUT @tailwind base (preflight); all other
      routes use global.css WITH preflight. Replicate the preflight subset the header
-     relies on — scoped under <header>, element-level (specificity 0,0,2) so Tailwind
-     utility classes (0,1,0) still win — so the one SiteHeader renders IDENTICALLY on
-     every route. Without this, the search button + mega-menu promo show UA borders,
-     UA backgrounds, and the wrong font on the homepage only. */
-  header button, header input, header optgroup, header select, header textarea {
+     relies on — scoped under <header>. The element lists are wrapped in :where() so
+     each selector's specificity stays (0,0,1) (just `header`), guaranteeing Tailwind
+     utility classes (e.g. bg-[#7D963D] = 0,1,0) ALWAYS win over these resets while the
+     resets still beat the user-agent defaults. Without :where(), `header [type='button']`
+     (0,1,1) would override bg utilities and the search button renders transparent. */
+  header :where(button, input, optgroup, select, textarea) {
     font-family: inherit; font-size: 100%; font-weight: inherit; line-height: inherit; color: inherit; margin: 0; padding: 0;
   }
-  header button, header input, header select, header textarea {
+  header :where(button, input, select, textarea) {
     border-width: 0; border-style: solid; border-color: currentColor;
   }
-  header button, header [type='button'], header [type='submit'] {
+  header :where(button, [type='button'], [type='submit']) {
     -webkit-appearance: button; background-color: transparent; background-image: none; cursor: pointer;
   }
-  header input::placeholder, header textarea::placeholder { color: #9ca3af; opacity: 1; }
+  header :where(input, textarea)::placeholder { color: #9ca3af; opacity: 1; }
 </style>
