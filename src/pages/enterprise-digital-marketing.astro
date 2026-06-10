@@ -27,16 +27,53 @@ const faqs = rows(e.faqs_items);                     // [q, a]
 // Lucide icons mapped by index (no proprietary SVGs needed; green like the theme).
 const whyIcons = ['trending-up', 'database', 'globe', 'user-plus', 'badge-check', 'crosshair'];
 const whychooseIcons = ['sliders-horizontal', 'workflow', 'activity', 'bar-chart-3', 'layout-grid', 'palette'];
-const serviceIcons = ['search', 'monitor', 'share-2', 'megaphone', 'file-text', 'shopping-cart', 'map-pin', 'line-chart'];
+const serviceIcons = ['search', 'monitor', 'share-2', 'megaphone', 'file-text', 'shopping-cart', 'map-pin', 'phone-call'];
 const subIcons = ['map-pin', 'wrench', 'link', 'star', 'sliders-horizontal', 'layout-template', 'shopping-bag', 'server', 'badge-check', 'video', 'building-2', 'phone'];
 const whyTints = ['bg-[#eef5e0]', 'bg-[#e7f1f5]', 'bg-[#fdeee0]', 'bg-[#f1ecf6]', 'bg-[#eaf3ec]', 'bg-[#fbf3d8]'];
 const includedTints = ['bg-[#eef5e0]', 'bg-[#e7f1f5]', 'bg-[#fdeee0]'];
 
 const BTN = 'inline-flex items-center justify-center rounded-full bg-[#db7803] hover:bg-[#c26a00] transition-colors text-white font-extrabold uppercase tracking-wide text-[13px] px-7 py-3.5';
-const BTN_OUTLINE = 'inline-flex items-center justify-center rounded-full border-2 border-[#7ab317] text-[#5f8f12] hover:bg-[#f3f8ea] transition-colors font-extrabold uppercase tracking-wide text-[13px] px-7 py-3.5';
+
+// ── SEO: canonical, Open Graph, and JSON-LD structured data ──────────────
+const origin = Astro.url.origin;
+const pageUrl = origin + '/enterprise-digital-marketing';
+const seoTitle = e.seo_title || 'Enterprise Digital Marketing Services | Thrive';
+const seoDesc = e.seo_description || e.hero_sub || '';
+
+const breadcrumbLd = {
+  '@context': 'https://schema.org', '@type': 'BreadcrumbList',
+  itemListElement: [
+    { name: 'Home', item: origin + '/' },
+    { name: 'Digital Marketing Services', item: origin + '/digital-marketing-services' },
+    { name: 'Enterprise Digital Marketing', item: pageUrl },
+  ].map((x, i) => ({ '@type': 'ListItem', position: i + 1, name: x.name, item: x.item })),
+};
+const serviceLd = {
+  '@context': 'https://schema.org', '@type': 'Service',
+  name: 'Enterprise Digital Marketing', serviceType: 'Enterprise Digital Marketing',
+  provider: { '@type': 'Organization', name: 'Thrive Internet Marketing Agency', url: origin },
+  areaServed: 'US', description: seoDesc, url: pageUrl,
+};
+const faqLd = faqs.length
+  ? {
+      '@context': 'https://schema.org', '@type': 'FAQPage',
+      mainEntity: faqs.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })),
+    }
+  : null;
+const jsonLd = [breadcrumbLd, serviceLd, ...(faqLd ? [faqLd] : [])];
 ---
 
-<Layout title={e.seo_title || 'Enterprise Digital Marketing Services | Thrive'} description={e.seo_description}>
+<Layout title={seoTitle} description={seoDesc}>
+  <Fragment slot="head">
+    <link rel="canonical" href={pageUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={seoTitle} />
+    <meta property="og:description" content={seoDesc} />
+    <meta property="og:url" content={pageUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+    {jsonLd.map((obj) => <script type="application/ld+json" set:html={JSON.stringify(obj)} />)}
+  </Fragment>
+
   <!-- ============== Hero ============== -->
   <section class="relative overflow-hidden bg-white">
     <div aria-hidden="true" class="pointer-events-none absolute left-0 top-0 bottom-0 w-[30%] max-w-[460px]" style="background:url(/assets/dms-strategy/subpage-header-left-corner.svg) no-repeat left bottom; background-size:contain;"></div>

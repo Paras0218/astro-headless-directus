@@ -30,6 +30,7 @@ const [header, navItems, megaMenus, resultCards] = await Promise.all([
     {description && <meta name="description" content={description} />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
+    <slot name="head" />
   </head>
   <body class="bg-white text-slate-900 font-sans antialiased" style="font-family:'proximanova','proxima-nova-1',Arial,sans-serif;">
     <SiteHeader header={header} navItems={navItems} megaMenus={megaMenus} resultCards={resultCards} path={path} />
