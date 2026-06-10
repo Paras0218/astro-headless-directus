@@ -654,3 +654,47 @@ export async function getDMSStrategy(): Promise<DMSStrategy> {
     return {} as DMSStrategy;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Enterprise Digital Marketing page — singleton `enterprise`. Same content-heavy
+// pattern as `dms_strategy`: repeating groups are newline-separated, "|"-delimited
+// rows (service blocks use "Title || Intro"); parsed in the .astro page.
+// ---------------------------------------------------------------------------
+
+export interface Enterprise {
+  seo_title: string; seo_description: string;
+  hero_h1: string; hero_sub: string; hero_form_button: string;
+  intro_h2: string; intro_body: string; intro_sub_h: string; intro_body2: string;
+  intro_cta_text: string; intro_cta_url: string;
+  why_eyebrow: string; why_h2: string; why_body: string;
+  why_items: string;                              // "Title | Description" per line
+  why_cta_text: string; why_cta_url: string;
+  cases_eyebrow: string; cases_h2: string; cases_body: string;
+  cases_items: string;                            // "Name | s1num | s1label | s2num | s2label | quote" per line
+  cases_footer: string; cases_cta_text: string; cases_cta_url: string;
+  services_eyebrow: string; services_h2: string;
+  services_blocks: string;                        // "Title || Intro" per line
+  services_subitems: string;                      // "BlockNum | Title | Description" per line
+  services_cta_text: string; services_cta_url: string;
+  included_eyebrow: string; included_h2: string;
+  included_s1_title: string; included_s1_desc: string;
+  included_s1_items: string;                      // "Title | Description" per line
+  included_s1_footer: string;
+  included_s2_title: string; included_s2_list: string;  // newline bullets
+  included_s3_title: string; included_s3_list: string;  // newline bullets
+  included_cta_text: string; included_cta_url: string;
+  whychoose_eyebrow: string; whychoose_h2: string; whychoose_body: string;
+  whychoose_items: string;                        // "Title | Description" per line
+  whychoose_cta_text: string; whychoose_cta_url: string;
+  faqs_h2: string; faqs_items: string;            // "Question | Answer" per line
+  cta_h2: string; cta_text: string; cta_btn1_text: string; cta_btn1_url: string; cta_btn2_text: string;
+}
+
+export async function getEnterprise(): Promise<Enterprise> {
+  try {
+    const data = await directusGet<Enterprise | null>('/items/enterprise');
+    return data ?? ({} as Enterprise);
+  } catch {
+    return {} as Enterprise;
+  }
+}
