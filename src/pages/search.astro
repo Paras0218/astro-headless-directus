@@ -1,0 +1,95 @@
+---
+// Search results page. Mirrors the WordPress search.php behaviour:
+//   /search?s=<query>  ->  "Search Results For: <query>" + matches, or
+//   "Sorry, no posts were found." when nothing matches.
+// Reuses Layout.astro (the single SiteHeader + SiteFooter) — nothing duplicated.
+import Layout from '../layouts/Layout.astro';
+import { getNavItems, getMegaMenus, getSearchPage } from '../lib/directus';
+
+export const prerender = false; // read ?s= at request time (SSR)
+
+const q = (Astro.url.searchParams.get('s') || '').trim();
+
+// CMS-editable labels (search_page singleton) + the search index.
+// The site has no blog posts; build a lightweight index of the real "pages":
+// the static routes + every nav / mega-menu link defined in Directus.
+const [searchPage, navItems, megaMenus] = await Promise.all([getSearchPage(), getNavItems(), getMegaMenus()]);
+
+type Hit = { title: string; url: string; context?: string };
+const index: Hit[] = [
+  { title: 'Home', url: '/' },
+  { title: 'Digital Marketing Services', url: '/digital-marketing-services' },
+  { title: 'About', url: '/about' },
+  { title: 'Contact', url: '/contact' },
+];
+for (const item of navItems) {
+  if (item.url && item.url !== '#') index.push({ title: item.label, url: item.url });
+  for (const sub of item.subitems) index.push({ title: sub.label, url: sub.url, context: item.label });
+}
+for (const [menu, cats] of Object.entries(megaMenus)) {
+  for (const cat of cats) {
+    if (cat.title && cat.url) index.push({ title: cat.title, url: cat.url, context: menu });
+    for (const link of cat.links) index.push({ title: link.label, url: link.url, context: `${menu} › ${cat.title}` });
+  }
+}
+
+const needle = q.toLowerCase();
+const seen = new Set<string>();
+const results: Hit[] = q
+  ? index.filter((h) => {
+      if (!h.title.toLowerCase().includes(needle)) return false;
+      const key = `${h.url}|${h.title.toLowerCase()}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+  : [];
+---
+<Layout title={q ? `${searchPage.results_heading} ${q}` : searchPage.seo_title} description={q ? `Search results for ${q}` : 'Search the site'}>
+  <!-- Heading band (matches the WP search results header) -->
+  <section class="bg-gradient-to-b from-[#f3f8ea] to-white">
+    <div class="max-w-5xl mx-auto px-4 py-16 text-center">
+      <h1 class="text-4xl md:text-5xl font-extrabold text-[#333] tracking-tight">
+        {q ? <>{searchPage.results_heading} <span class="text-[#7D963D]">{q}</span></> : searchPage.seo_title}
+      </h1>
+
+      <!-- Search-again form (GET -> /search?s=), same as the WP results page -->
+      <form role="search" method="get" action="/search" class="mt-8 mx-auto max-w-md flex items-center gap-2">
+        <input
+          type="search"
+          name="s"
+          value={q}
+          required
+          autocomplete="off"
+          placeholder={searchPage.input_placeholder}
+          class="flex-1 h-11 rounded-md border border-[#ddd] bg-white px-4 text-[15px] text-[#555] focus:outline-none focus:ring-2 focus:ring-[#7D963D]/40"
+        />
+        <button
+          type="submit"
+          aria-label="Submit search"
+          class="h-11 w-11 shrink-0 rounded-md bg-[#7D963D] hover:bg-[#5d7129] text-white flex items-center justify-center transition-colors"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Results / empty state -->
+  <section class="max-w-4xl mx-auto px-4 py-16">
+    {!q ? (
+      <p class="text-center text-lg text-[#555]">{searchPage.empty_prompt}</p>
+    ) : results.length > 0 ? (
+      <ul class="divide-y divide-slate-200 border-y border-slate-200">
+        {results.map((r) => (
+          <li class="py-4">
+            <a href={r.url} class="text-[#7D963D] hover:text-[#5d7129] font-bold text-lg transition-colors">{r.title}</a>
+            {r.context && <span class="ml-2 text-sm text-slate-500">in {r.context}</span>}
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <h3 class="text-center text-xl text-[#555] mt-2">{searchPage.no_results_text}</h3>
+    )}
+  </section>
+</Layout>
