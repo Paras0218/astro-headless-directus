@@ -19,8 +19,6 @@ type Hit = { title: string; url: string; context?: string };
 const index: Hit[] = [
   { title: 'Home', url: '/' },
   { title: 'Digital Marketing Services', url: '/digital-marketing-services' },
-  { title: 'About', url: '/about' },
-  { title: 'Contact', url: '/contact' },
 ];
 for (const item of navItems) {
   if (item.url && item.url !== '#') index.push({ title: item.label, url: item.url });

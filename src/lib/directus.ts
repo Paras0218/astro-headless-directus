@@ -195,105 +195,6 @@ export const getHomeValues = () => getList<ValueCard>('home_values');
 export const getTestimonials = () => getList<Testimonial>('testimonials');
 
 // ---------------------------------------------------------------------------
-// About page (singleton) — same fail-safe pattern as the homepage.
-// ---------------------------------------------------------------------------
-
-export interface About {
-  seo_title: string;
-  seo_description: string;
-  hero_eyebrow: string;
-  hero_heading: string;
-  hero_subheading: string;
-  story_heading: string;
-  story_body: string;
-  stat1_value: string;
-  stat1_label: string;
-  stat2_value: string;
-  stat2_label: string;
-  stat3_value: string;
-  stat3_label: string;
-  stat4_value: string;
-  stat4_label: string;
-  mission_heading: string;
-  mission_body: string;
-  cta_heading: string;
-  cta_text: string;
-  cta_button_label: string;
-  cta_button_url: string;
-  // Optimize / Generate / Grow section (three icon cards + two CTAs)
-  og_intro: string;
-  og_card1_icon: string; // Lucide icon name (e.g. "settings")
-  og_card1_title: string;
-  og_card1_sub: string;
-  og_card2_icon: string;
-  og_card2_title: string;
-  og_card2_sub: string;
-  og_card3_icon: string;
-  og_card3_title: string;
-  og_card3_sub: string;
-  og_cta1_text: string;
-  og_cta1_url: string;
-  og_cta2_text: string;
-  og_cta2_url: string;
-}
-
-export const DEFAULT_ABOUT: About = {
-  seo_title: 'About Us | ThriveAgency Clone',
-  seo_description:
-    'We are a growth-obsessed digital marketing team pairing creative strategy with engineering rigor to drive measurable revenue.',
-  hero_eyebrow: 'About The Agency',
-  hero_heading: 'Growth-obsessed marketers, engineering-grade execution.',
-  hero_subheading:
-    'We blend creative strategy with a fast, headless tech stack to turn marketing spend into predictable, compounding revenue for ambitious brands.',
-  story_heading: 'Our Story',
-  story_body:
-    'Founded on a simple belief — that marketing should be measurable — we set out to close the gap between brand storytelling and hard revenue.\n\nToday we run full-funnel programs for companies that want more than vanity metrics. Every campaign is wired to a structured data layer, so the impact of every dollar is transparent and accountable.',
-  stat1_value: '12+',
-  stat1_label: 'Years of combined expertise',
-  stat2_value: '$250M+',
-  stat2_label: 'Client revenue influenced',
-  stat3_value: '500+',
-  stat3_label: 'Campaigns launched',
-  stat4_value: '98%',
-  stat4_label: 'Client retention rate',
-  mission_heading: 'Our Mission',
-  mission_body:
-    'To be the most accountable growth partner our clients have ever worked with — obsessed with outcomes, allergic to fluff, and relentless about the numbers that actually move the business.',
-  cta_heading: 'Ready to drive real growth?',
-  cta_text: 'Tell us about your objectives and we will put together a tailored proposal.',
-  cta_button_label: 'Get Your Free Proposal',
-  cta_button_url: '/',
-  og_intro:
-    'Thrive Internet Marketing Agency is an award-winning digital marketing company that offers a full spectrum of data-driven web marketing services. We develop growth-oriented online marketing campaigns that make a positive impact on businesses.',
-  og_card1_icon: 'settings', og_card1_title: 'OPTIMIZE', og_card1_sub: 'Marketing Processes',
-  og_card2_icon: 'circle-check', og_card2_title: 'GENERATE', og_card2_sub: 'Targeted Results',
-  og_card3_icon: 'bar-chart-3', og_card3_title: 'GROW', og_card3_sub: 'Your Brand Online',
-  og_cta1_text: 'STRATEGY-FIRST AGENCY', og_cta1_url: '/',
-  og_cta2_text: 'GET MY FREE PROPOSAL', og_cta2_url: '/',
-};
-
-function mergeAbout(data: Partial<About>): About {
-  const result: About = { ...DEFAULT_ABOUT };
-  for (const key of Object.keys(DEFAULT_ABOUT) as Array<keyof About>) {
-    const value = data[key];
-    if (typeof value === 'string' && value.trim() !== '') {
-      result[key] = value;
-    }
-  }
-  return result;
-}
-
-export async function getAbout(): Promise<About> {
-  try {
-    const data = await directusGet<Partial<About> | null>('/items/about');
-    if (!data) return { ...DEFAULT_ABOUT };
-    return mergeAbout(data);
-  } catch {
-    return { ...DEFAULT_ABOUT };
-  }
-}
-
-// ---------------------------------------------------------------------------
 // Search results page (singleton) — CMS-editable labels, same fail-safe pattern.
 // ---------------------------------------------------------------------------
 
@@ -369,7 +270,6 @@ export const DEFAULT_NAV: NavItem[] = [
   { id: 1, label: 'SERVICES', url: '#', has_dropdown: true, subitems: [] },
   { id: 2, label: 'LOCAL', url: '#', has_dropdown: true, subitems: [] },
   { id: 3, label: 'RESULTS', url: '#', has_dropdown: true, subitems: [] },
-  { id: 4, label: 'ABOUT', url: '/about', has_dropdown: true, subitems: [] },
   { id: 5, label: 'LEARN', url: '#', has_dropdown: true, subitems: [] },
   { id: 6, label: 'CONTACT', url: '/', has_dropdown: false, subitems: [] },
 ];
